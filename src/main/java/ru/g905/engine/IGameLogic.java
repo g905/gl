@@ -5,8 +5,6 @@
  */
 package ru.g905.engine;
 
-import ru.g905.engine.graph.Mesh;
-
 /**
  *
  * @author g905
