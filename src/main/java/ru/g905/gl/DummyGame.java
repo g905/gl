@@ -27,10 +27,6 @@ public class DummyGame implements IGameLogic {
     
     private final Vector3f cameraInc;
 
-    private int displxInc = 0;
-    private int displyInc = 0;
-    private int displzInc = 0;
-    private int scaleInc = 0;
     private final Renderer renderer;
     private final Camera camera;
     private Mesh mesh;
@@ -146,8 +142,8 @@ public class DummyGame implements IGameLogic {
         mesh = new Mesh(positions, texCoords, indices, texture);
         
         float z = 0;
-        float inc = 0.08f;
-        float inc2 = 0.01f;
+        float inc = 0.05f;
+        float inc2 = 0.05f;
         for(int i = 0; i < 200; ++i) {
             if (i < 100) {
                 z += inc;
