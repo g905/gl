@@ -21,6 +21,7 @@ import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import ru.g905.engine.GameItem;
+import ru.g905.engine.graph.Camera;
 import ru.g905.engine.graph.Transformation;
 
 /**
@@ -54,7 +55,7 @@ public class Renderer {
         float aspectRatio = (float) window.getWidth() / window.getHeight();
         projectionMatrix = new Matrix4f().setPerspective(Renderer.FOV, aspectRatio, Renderer.Z_NEAR, Renderer.Z_FAR);
         shaderProgram.createUniform("projectionMatrix");
-        shaderProgram.createUniform("worldMatrix");
+        shaderProgram.createUniform("modelViewMatrix");
         shaderProgram.createUniform("texture_sampler");
         
         window.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -64,7 +65,7 @@ public class Renderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(Window window, ArrayList<GameItem> gameItems) {
+    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems) {
         clear();
 
         if (window.isResized()) {
@@ -83,16 +84,14 @@ public class Renderer {
         );
         shaderProgram.setUniform("projectionMatrix", projectionMatrix);
 
+        Matrix4f viewMatrix = transformation.getViewMatrix(camera);
+        
         shaderProgram.setUniform("texture_sampler", 0);
         
         for (GameItem gameItem : gameItems) {
-            Matrix4f worldMatrix = 
-                    transformation.getWorldMatrix(
-                            gameItem.getPosition(), 
-                            gameItem.getRotation(), 
-                            gameItem.getScale()
-                    );
-            shaderProgram.setUniform("worldMatrix", worldMatrix);
+            Matrix4f modelViewMatrix = 
+                    transformation.getModelViewMatrix(gameItem, viewMatrix);
+            shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
             
             gameItem.getMesh().render();
         }
