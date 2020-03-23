@@ -68,4 +68,8 @@ public class Texture {
         stbi_image_free(buf);
         return textureId;
     }
+    
+    public void cleanup() {
+        glDeleteTextures(id);
+    }
 }

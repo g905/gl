@@ -5,11 +5,17 @@
  */
 package ru.g905.engine;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBImage.stbi_failure_reason;
+import static org.lwjgl.stb.STBImage.stbi_load;
+import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -38,7 +44,7 @@ public class Window {
         this.resized = false;
     }
 
-    public void init() {
+    public void init() throws Exception {
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
         GLFWErrorCallback.createPrint(System.err).set();
@@ -106,6 +112,33 @@ public class Window {
         glEnable(GL_BLEND);
         
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        
+        setIcon("/home/g905/NetBeansProjects/gl/icon5.png");
+    }
+    
+    public void setIcon(String path) throws Exception {
+        ByteBuffer buff;
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
+
+            buff = stbi_load(path, w, h, channels, 4);
+            if (buff == null) {
+                throw new Exception("Image file [" + path + "] not loaded: " + stbi_failure_reason());
+            }
+
+            width = w.get();
+            height = h.get();
+
+            GLFWImage.Buffer icons = GLFWImage.malloc(1);
+            icons.position(0).width(width).height(height).pixels(buff);
+
+            glfwSetWindowIcon(windowHandle, icons);
+        }
     }
     
     public long getWindowHandle() {
