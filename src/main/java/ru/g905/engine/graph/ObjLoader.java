@@ -20,8 +20,7 @@ public class ObjLoader {
     public static Mesh loadMesh(String filename) throws Exception {
         List<String> lines = Utils.readAllLines(filename);
 
-        System.out.println(lines);
-        
+        //System.out.println(lines);
         List<Vector3f> vertices = new ArrayList<>();
         List<Vector2f> textures = new ArrayList<>();
         List<Vector3f> normals = new ArrayList<>();
@@ -74,10 +73,10 @@ public class ObjLoader {
         }
         float[] texCoordArr = new float[posList.size() * 2];
         float[] normArr = new float[posList.size() * 3];
-        
+
         for (Face face : facesList) {
             IdxGroup[] faceVertexIndices = face.getFaceVertexIndices();
-            for(IdxGroup indValue : faceVertexIndices) {
+            for (IdxGroup indValue : faceVertexIndices) {
                 processFaceVertex(indValue, texCoordList, normList, indices, texCoordArr, normArr);
             }
         }
@@ -86,17 +85,17 @@ public class ObjLoader {
         Mesh mesh = new Mesh(posArr, texCoordArr, normArr, indicesArr);
         return mesh;
     }
-    
+
     private static void processFaceVertex(IdxGroup indices, List<Vector2f> texCoordList, List<Vector3f> normList, List<Integer> indicesList, float[] texCoordArr, float[] normArr) {
         int posIndex = indices.idxPos;
         indicesList.add(posIndex);
-        
+
         if (indices.idxTexCoord >= 0) {
             Vector2f texCoord = texCoordList.get(indices.idxTexCoord);
             texCoordArr[posIndex * 2] = texCoord.x;
             texCoordArr[posIndex * 2 + 1] = 1 - texCoord.y;
         }
-        if(indices.idxVecNormal >= 0) {
+        if (indices.idxVecNormal >= 0) {
             Vector3f vecNorm = normList.get(indices.idxVecNormal);
             normArr[posIndex * 3] = vecNorm.x;
             normArr[posIndex * 3 + 1] = vecNorm.y;

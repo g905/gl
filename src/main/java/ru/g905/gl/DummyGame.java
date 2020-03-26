@@ -23,9 +23,9 @@ import ru.g905.engine.graph.Texture;
  * @author g905
  */
 public class DummyGame implements IGameLogic {
-    
+
     private static final float MOUSE_SENSIVITY = 0.2f;
-    
+
     private final Vector3f cameraInc;
 
     private final Renderer renderer;
@@ -38,48 +38,49 @@ public class DummyGame implements IGameLogic {
         gameItems = new ArrayList<>();
         camera = new Camera();
         cameraInc = new Vector3f();
-        
+
     }
 
     @Override
     public void init(Window window) throws Exception {
         renderer.init(window);
-        
+
         Texture texture = new Texture("src/main/resources/textures/grassblock.png");
-        Mesh mesh = ObjLoader.loadMesh("models/bunny.obj");
+        Mesh mesh = ObjLoader.loadMesh("models/screw.obj");
         //mesh.setTexture(texture);
-        
-        /*float z = 0;
+
+        float z = 0;
         float inc = 0.05f;
         float inc2 = 0.05f;
-        for(int i = 0; i < 100; ++i) {
-            if (i < 50) {
+        for (int i = 0; i < 50; ++i) {
+            if (i < 25) {
                 z += inc;
             } else {
                 z -= inc;
             }
-            for (int j = 0; j < 100; ++j) {
-                if (j < 50) {
+            for (int j = 0; j < 50; ++j) {
+                if (j < 25) {
                     z += inc2;
                 } else {
                     z -= inc2;
                 }
                 GameItem gamei = new GameItem(mesh);
-                gamei.setPosition(i, z*z, j);
+                gamei.setPosition(i, z * z, j);
+                gamei.setScale(0.01f);
                 gameItems.add(gamei);
             }
-        }*/
-        GameItem gamei = new GameItem(mesh);
+        }
+        /*GameItem gamei = new GameItem(mesh);
         gamei.setPosition(0, 0, -2);
         gamei.setScale(1.5f);
-        gameItems.add(gamei);
+        gameItems.add(gamei);*/
 
         //gameItems = new GameItem[]{gameItem, gameItem2};
     }
 
     @Override
     public void input(Window window, MouseInput mouseInput) {
-        cameraInc.set(0,0,0);
+        cameraInc.set(0, 0, 0);
         if (window.isKeyPressed(GLFW_KEY_W)) {
             cameraInc.z = -1;
         } else if (window.isKeyPressed(GLFW_KEY_S)) {
@@ -100,7 +101,7 @@ public class DummyGame implements IGameLogic {
     @Override
     public void update(float interval, MouseInput mouseInput) {
         camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
-        
+
         if (mouseInput.isRightButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
             camera.moveRotation(rotVec.x * MOUSE_SENSIVITY, rotVec.y * MOUSE_SENSIVITY, 0);
