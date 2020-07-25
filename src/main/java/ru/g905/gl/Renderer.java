@@ -14,6 +14,7 @@ import ru.g905.engine.GameItem;
 import ru.g905.engine.Utils;
 import ru.g905.engine.Window;
 import ru.g905.engine.graph.Camera;
+import ru.g905.engine.graph.DirectionalLight;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.PointLight;
 import ru.g905.engine.graph.ShaderProgram;
@@ -58,14 +59,14 @@ public class Renderer {
         shaderProgram.createUniform("specularPower");
         shaderProgram.createUniform("ambientLight");
         shaderProgram.createPointLightUniform("pointLight");
+        shaderProgram.createDirectionalLightUniform("dirLight");
     }
 
     public void clear() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems, Vector3f ambientLight,
-            PointLight pointLight) {
+    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems, Vector3f ambientLight, PointLight pointLight, DirectionalLight dirLight) {
 
         clear();
 
@@ -95,6 +96,12 @@ public class Renderer {
         lightPos.y = aux.y;
         lightPos.z = aux.z;
         shaderProgram.setUniform("pointLight", currPointLight);
+
+        DirectionalLight currDirLight = new DirectionalLight(dirLight);
+        Vector4f dir = new Vector4f(currDirLight.getDirection(), 0);
+        dir.mul(viewMatrix);
+        currDirLight.setDirection(new Vector3f(dir.x, dir.y, dir.z));
+        shaderProgram.setUniform("dirLight", currDirLight);
 
         shaderProgram.setUniform("texture_sampler", 0);
         // Render each gameItem
