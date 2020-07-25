@@ -7,67 +7,66 @@ package ru.g905.gl;
 
 import java.util.ArrayList;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import static org.lwjgl.opengl.GL11.*;
+import ru.g905.engine.GameItem;
 import ru.g905.engine.Utils;
 import ru.g905.engine.Window;
-import ru.g905.engine.graph.Mesh;
-import ru.g905.engine.graph.ShaderProgram;
-
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glDrawElements;
-import static org.lwjgl.opengl.GL11.glViewport;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import ru.g905.engine.GameItem;
 import ru.g905.engine.graph.Camera;
+import ru.g905.engine.graph.Mesh;
+import ru.g905.engine.graph.PointLight;
+import ru.g905.engine.graph.ShaderProgram;
 import ru.g905.engine.graph.Transformation;
 
-/**
- *
- * @author g905
- */
 public class Renderer {
 
+    /**
+     * Field of View in Radians
+     */
     private static final float FOV = (float) Math.toRadians(60.0f);
 
     private static final float Z_NEAR = 0.01f;
 
     private static final float Z_FAR = 1000.f;
 
-    private Matrix4f projectionMatrix;
+    private final Transformation transformation;
 
     private ShaderProgram shaderProgram;
 
-    private Transformation transformation;
+    private float specularPower;
 
     public Renderer() {
         transformation = new Transformation();
+        specularPower = 10f;
     }
 
     public void init(Window window) throws Exception {
+        // Create shader
         shaderProgram = new ShaderProgram();
-        shaderProgram.createVertexShader(Utils.loadResource("/ru/g905/gl/shaders/vertex.vs"));
-        shaderProgram.createFragmentShader(Utils.loadResource("/ru/g905/gl/shaders/fragment.fs"));
+        shaderProgram.createVertexShader(Utils.loadResource("/shaders/vertex.vs"));
+        shaderProgram.createFragmentShader(Utils.loadResource("/shaders/fragment.fs"));
         shaderProgram.link();
 
-        float aspectRatio = (float) window.getWidth() / window.getHeight();
-        projectionMatrix = new Matrix4f().setPerspective(Renderer.FOV, aspectRatio, Renderer.Z_NEAR, Renderer.Z_FAR);
+        // Create uniforms for modelView and projection matrices and texture
         shaderProgram.createUniform("projectionMatrix");
         shaderProgram.createUniform("modelViewMatrix");
         shaderProgram.createUniform("texture_sampler");
-        shaderProgram.createUniform("color");
-        shaderProgram.createUniform("useColor");
-
-        window.setClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        // Create uniform for material
+        shaderProgram.createMaterialUniform("material");
+        // Create lighting related uniforms
+        shaderProgram.createUniform("specularPower");
+        shaderProgram.createUniform("ambientLight");
+        shaderProgram.createPointLightUniform("pointLight");
     }
 
     public void clear() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems) {
+    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems, Vector3f ambientLight,
+            PointLight pointLight) {
+
         clear();
 
         if (window.isResized()) {
@@ -77,27 +76,35 @@ public class Renderer {
 
         shaderProgram.bind();
 
-        projectionMatrix = transformation.getProjectionMatrix(
-                FOV,
-                window.getWidth(),
-                window.getHeight(),
-                Z_NEAR,
-                Z_FAR
-        );
+        // Update projection Matrix
+        Matrix4f projectionMatrix = transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
         shaderProgram.setUniform("projectionMatrix", projectionMatrix);
 
+        // Update view Matrix
         Matrix4f viewMatrix = transformation.getViewMatrix(camera);
 
-        shaderProgram.setUniform("texture_sampler", 0);
+        // Update Light Uniforms
+        shaderProgram.setUniform("ambientLight", ambientLight);
+        shaderProgram.setUniform("specularPower", specularPower);
+        // Get a copy of the light object and transform its position to view coordinates
+        PointLight currPointLight = new PointLight(pointLight);
+        Vector3f lightPos = currPointLight.getPosition();
+        Vector4f aux = new Vector4f(lightPos, 1);
+        aux.mul(viewMatrix);
+        lightPos.x = aux.x;
+        lightPos.y = aux.y;
+        lightPos.z = aux.z;
+        shaderProgram.setUniform("pointLight", currPointLight);
 
+        shaderProgram.setUniform("texture_sampler", 0);
+        // Render each gameItem
         for (GameItem gameItem : gameItems) {
             Mesh mesh = gameItem.getMesh();
-            Matrix4f modelViewMatrix
-                    = transformation.getModelViewMatrix(gameItem, viewMatrix);
+            // Set model view matrix for this item
+            Matrix4f modelViewMatrix = transformation.getModelViewMatrix(gameItem, viewMatrix);
             shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
-            shaderProgram.setUniform("color", mesh.getColor());
-            shaderProgram.setUniform("useColor", mesh.isTextured() ? 0 : 1);
-
+            // Render the mesh for this game item
+            shaderProgram.setUniform("material", mesh.getMaterial());
             mesh.render();
         }
 
