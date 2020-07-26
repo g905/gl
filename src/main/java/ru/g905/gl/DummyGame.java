@@ -19,6 +19,7 @@ import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.ObjLoader;
 import ru.g905.engine.graph.PointLight;
+import ru.g905.engine.graph.SpotLight;
 import ru.g905.engine.graph.Texture;
 
 public class DummyGame implements IGameLogic {
@@ -37,11 +38,16 @@ public class DummyGame implements IGameLogic {
 
     private PointLight pointLight;
 
+    private SpotLight spotLight;
+
     private DirectionalLight dirLight;
 
     private float lightAngle;
 
     private static final float CAMERA_POS_STEP = 0.05f;
+
+    private float spotAngle = 0;
+    private float spotInc = 1;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -91,13 +97,21 @@ public class DummyGame implements IGameLogic {
         gameItem.setPosition(0, 0, -2);
         gameItems.add(gameItem);
          */
-        ambientLight = new Vector3f(0.3f, 0.3f, 0.3f);
+        ambientLight = new Vector3f(0.2f, 0.2f, 0.2f);
         Vector3f lightColour = new Vector3f(1, 1, 1);
         Vector3f lightPosition = new Vector3f(0, 0, 1);
-        float lightIntensity = 1.0f;
+        float lightIntensity = 5.0f;
         pointLight = new PointLight(lightColour, lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
+
+        lightPosition = new Vector3f(0, 30.0f, 0f);
+        PointLight sl_pointLight = new PointLight(new Vector3f(1, 0, 0), lightPosition, lightIntensity);
+        att = new PointLight.Attenuation(0.0f, 0.0f, 0.001f);
+        sl_pointLight.setAttenuation(att);
+        Vector3f coneDir = new Vector3f(0, -1, 0);
+        float cutoff = (float) Math.cos(Math.toRadians(10));
+        spotLight = new SpotLight(sl_pointLight, coneDir, cutoff);
 
         lightPosition = new Vector3f(-1, 0, 0);
         lightColour = new Vector3f(1, 1, 1);
@@ -122,15 +136,47 @@ public class DummyGame implements IGameLogic {
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
             cameraInc.y = 1;
         }
-        float lightPos = pointLight.getPosition().z;
-        if (window.isKeyPressed(GLFW_KEY_N)) {
-            this.pointLight.getPosition().z = lightPos + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_M)) {
-            this.pointLight.getPosition().z = lightPos - 0.1f;
+
+        float plLightPos = pointLight.getPosition().z;
+        if (window.isKeyPressed(GLFW_KEY_K)) {
+            this.pointLight.getPosition().z = plLightPos + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_L)) {
+            this.pointLight.getPosition().z = plLightPos - 0.1f;
         }
+
+        Vector3f lightPos = spotLight.getPointLight().getPosition();
+        if (window.isKeyPressed(GLFW_KEY_N)) {
+            this.spotLight.getPointLight().getPosition().z = lightPos.z + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_M)) {
+            this.spotLight.getPointLight().getPosition().z = lightPos.z - 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_J)) {
+            this.spotLight.getPointLight().getPosition().y = lightPos.y + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_H)) {
+            this.spotLight.getPointLight().getPosition().y = lightPos.y - 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_U)) {
+            this.spotLight.getPointLight().getPosition().x = lightPos.x + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_Y)) {
+            this.spotLight.getPointLight().getPosition().x = lightPos.x - 0.1f;
+        }
+
+        Vector3f coneDir = spotLight.getConeDirection();
+        if (window.isKeyPressed(GLFW_KEY_R)) {
+            this.spotLight.getConeDirection().x = coneDir.x + 0.01f;
+        } else if (window.isKeyPressed(GLFW_KEY_T)) {
+            this.spotLight.getConeDirection().x = coneDir.x - 0.01f;
+        } else if (window.isKeyPressed(GLFW_KEY_F)) {
+            this.spotLight.getConeDirection().y = coneDir.y + 0.01f;
+        } else if (window.isKeyPressed(GLFW_KEY_G)) {
+            this.spotLight.getConeDirection().y = coneDir.y - 0.01f;
+        } else if (window.isKeyPressed(GLFW_KEY_C)) {
+            this.spotLight.getConeDirection().z = coneDir.z + 0.01f;
+        } else if (window.isKeyPressed(GLFW_KEY_V)) {
+            this.spotLight.getConeDirection().z = coneDir.z - 0.01f;
+        }
+
         GameItem gi = gameItems.get(0);
         float c = gi.getRotation().y;
-        gi.setRotation(0, c + 2f, 0);
+        gi.setRotation(0, c + 0.2f, 0);
     }
 
     @Override
@@ -144,7 +190,19 @@ public class DummyGame implements IGameLogic {
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
 
-        lightAngle += 1.1f;
+        spotAngle += spotInc * 0.5f;
+        if (spotAngle > 60) {
+            spotInc = -1;
+        } else if (spotAngle < 0) {
+            spotInc = 1;
+        }
+
+        double spotAngleRad = Math.toRadians(spotAngle);
+        Vector3f coneDir = spotLight.getConeDirection();
+        coneDir.x = (float) Math.sin(spotAngleRad);
+        coneDir.z = (float) Math.cos(spotAngleRad);
+
+        lightAngle += 0.03f;
         if (lightAngle > 90) {
             dirLight.setIntensity(0);
             if (lightAngle >= 360) {
@@ -153,8 +211,8 @@ public class DummyGame implements IGameLogic {
         } else if (lightAngle <= -80 || lightAngle >= 80) {
             float factor = 1 - (float) (Math.abs(lightAngle) - 80) / 10.0f;
             dirLight.setIntensity(factor);
-            dirLight.getColor().y = Math.max(factor, 0.9f);
-            dirLight.getColor().z = Math.max(factor, 0.5f);
+            dirLight.getColor().y = Math.max(factor, 0.2f);
+            dirLight.getColor().z = Math.max(factor, 0.1f);
         } else {
             dirLight.setIntensity(1);
             dirLight.getColor().x = 1;
@@ -164,12 +222,13 @@ public class DummyGame implements IGameLogic {
         double angRad = Math.toRadians(lightAngle);
         dirLight.getDirection().x = (float) Math.sin(angRad);
         dirLight.getDirection().y = (float) Math.cos(angRad);
+        System.out.print("direction: x: " + spotLight.getConeDirection().x + ", y: " + spotLight.getConeDirection().y + ", z: " + spotLight.getConeDirection().z + "; position: x: " + spotLight.getPointLight().getPosition().x + ", y: " + spotLight.getPointLight().getPosition().y + ", z: " + spotLight.getPointLight().getPosition().z + "\n");
 
     }
 
     @Override
     public void render(Window window) {
-        renderer.render(window, camera, gameItems, ambientLight, pointLight, dirLight);
+        renderer.render(window, camera, gameItems, ambientLight, pointLight, spotLight, dirLight);
     }
 
     @Override

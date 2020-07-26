@@ -18,6 +18,7 @@ import ru.g905.engine.graph.DirectionalLight;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.PointLight;
 import ru.g905.engine.graph.ShaderProgram;
+import ru.g905.engine.graph.SpotLight;
 import ru.g905.engine.graph.Transformation;
 
 public class Renderer {
@@ -59,6 +60,7 @@ public class Renderer {
         shaderProgram.createUniform("specularPower");
         shaderProgram.createUniform("ambientLight");
         shaderProgram.createPointLightUniform("pointLight");
+        shaderProgram.createSpotLightUniform("spotLight");
         shaderProgram.createDirectionalLightUniform("dirLight");
     }
 
@@ -66,7 +68,7 @@ public class Renderer {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems, Vector3f ambientLight, PointLight pointLight, DirectionalLight dirLight) {
+    public void render(Window window, Camera camera, ArrayList<GameItem> gameItems, Vector3f ambientLight, PointLight pointLight, SpotLight spotLight, DirectionalLight dirLight) {
 
         clear();
 
@@ -97,8 +99,22 @@ public class Renderer {
         lightPos.z = aux.z;
         shaderProgram.setUniform("pointLight", currPointLight);
 
+        SpotLight currSpotLight = new SpotLight(spotLight);
+        Vector4f dir = new Vector4f(currSpotLight.getConeDirection(), 0);
+        dir.mul(viewMatrix);
+        currSpotLight.setConeDirection(new Vector3f(dir.x, dir.y, dir.z));
+
+        Vector3f spotLightPos = currSpotLight.getPointLight().getPosition();
+        Vector4f auxSpot = new Vector4f(spotLightPos, 1);
+        auxSpot.mul(viewMatrix);
+        spotLightPos.x = auxSpot.x;
+        spotLightPos.y = auxSpot.y;
+        spotLightPos.z = auxSpot.z;
+
+        shaderProgram.setUniform("spotLight", currSpotLight);
+
         DirectionalLight currDirLight = new DirectionalLight(dirLight);
-        Vector4f dir = new Vector4f(currDirLight.getDirection(), 0);
+        dir = new Vector4f(currDirLight.getDirection(), 0);
         dir.mul(viewMatrix);
         currDirLight.setDirection(new Vector3f(dir.x, dir.y, dir.z));
         shaderProgram.setUniform("dirLight", currDirLight);
