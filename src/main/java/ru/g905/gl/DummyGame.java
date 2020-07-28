@@ -36,9 +36,9 @@ public class DummyGame implements IGameLogic {
 
     private Vector3f ambientLight;
 
-    private PointLight pointLight;
+    private PointLight[] pointLights;
 
-    private SpotLight spotLight;
+    private SpotLight[] spotLights;
 
     private DirectionalLight dirLight;
 
@@ -101,17 +101,27 @@ public class DummyGame implements IGameLogic {
         Vector3f lightColour = new Vector3f(1, 1, 1);
         Vector3f lightPosition = new Vector3f(0, 0, 1);
         float lightIntensity = 5.0f;
-        pointLight = new PointLight(lightColour, lightPosition, lightIntensity);
+
+        PointLight pointLight = new PointLight(lightColour, lightPosition, lightIntensity);
+
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
 
+        pointLights = new PointLight[]{pointLight};
+
         lightPosition = new Vector3f(0, 30.0f, 0f);
         PointLight sl_pointLight = new PointLight(new Vector3f(1, 0, 0), lightPosition, lightIntensity);
+        PointLight sl_pointLight2 = new PointLight(new Vector3f(0, 1, 0), lightPosition, lightIntensity);
         att = new PointLight.Attenuation(0.0f, 0.0f, 0.001f);
         sl_pointLight.setAttenuation(att);
         Vector3f coneDir = new Vector3f(0, -1, 0);
         float cutoff = (float) Math.cos(Math.toRadians(10));
-        spotLight = new SpotLight(sl_pointLight, coneDir, cutoff);
+
+        SpotLight spotLight = new SpotLight(sl_pointLight, coneDir, cutoff);
+
+        SpotLight sl2 = new SpotLight(sl_pointLight2, coneDir, cutoff);
+
+        spotLights = new SpotLight[]{spotLight, new SpotLight(sl2)};
 
         lightPosition = new Vector3f(-1, 0, 0);
         lightColour = new Vector3f(1, 1, 1);
@@ -137,6 +147,21 @@ public class DummyGame implements IGameLogic {
             cameraInc.y = 1;
         }
 
+        Vector3f lightPos = spotLights[0].getPointLight().getPosition();
+        if (window.isKeyPressed(GLFW_KEY_N)) {
+            this.spotLights[0].getPointLight().getPosition().z = lightPos.z + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_M)) {
+            this.spotLights[0].getPointLight().getPosition().z = lightPos.z - 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_J)) {
+            this.spotLights[0].getPointLight().getPosition().y = lightPos.y + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_H)) {
+            this.spotLights[0].getPointLight().getPosition().y = lightPos.y - 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_U)) {
+            this.spotLights[0].getPointLight().getPosition().x = lightPos.x + 0.1f;
+        } else if (window.isKeyPressed(GLFW_KEY_Y)) {
+            this.spotLights[0].getPointLight().getPosition().x = lightPos.x - 0.1f;
+        }
+        /*
         float plLightPos = pointLight.getPosition().z;
         if (window.isKeyPressed(GLFW_KEY_K)) {
             this.pointLight.getPosition().z = plLightPos + 0.1f;
@@ -180,7 +205,7 @@ public class DummyGame implements IGameLogic {
         } else if (window.isKeyPressed(GLFW_KEY_E)) {
             this.spotLight.setCutOff(currCutoff - 0.01f);
         }
-
+         */
         GameItem gi = gameItems.get(0);
         float c = gi.getRotation().y;
         gi.setRotation(0, c + 1f, 0);
@@ -203,12 +228,12 @@ public class DummyGame implements IGameLogic {
         } else if (spotAngle < 0) {
             spotInc = 1;
         }
-
+        /*
         double spotAngleRad = Math.toRadians(spotAngle);
         Vector3f coneDir = spotLight.getConeDirection();
         coneDir.x = (float) Math.sin(spotAngleRad);
         coneDir.z = (float) Math.cos(spotAngleRad);
-
+         */
         lightAngle += 0.03f;
         if (lightAngle > 90) {
             dirLight.setIntensity(0);
@@ -235,7 +260,7 @@ public class DummyGame implements IGameLogic {
 
     @Override
     public void render(Window window) {
-        renderer.render(window, camera, gameItems, ambientLight, pointLight, spotLight, dirLight);
+        renderer.render(window, camera, gameItems, ambientLight, pointLights, spotLights, dirLight);
     }
 
     @Override
