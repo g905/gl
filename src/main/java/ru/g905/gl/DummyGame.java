@@ -73,14 +73,14 @@ public class DummyGame implements IGameLogic {
         float z = 0;
         float inc = 0.1f;
         float inc2 = 0.1f;
-        for (int i = 0; i < 50; ++i) {
-            if (i < 25) {
+        for (int i = 0; i < 30; ++i) {
+            if (i < 15) {
                 z += inc;
             } else {
                 z -= inc;
             }
-            for (int j = 0; j < 50; ++j) {
-                if (j < 25) {
+            for (int j = 0; j < 30; ++j) {
+                if (j < 15) {
                     z += inc2;
                 } else {
                     z -= inc2;
@@ -174,9 +174,16 @@ public class DummyGame implements IGameLogic {
             this.spotLight.getConeDirection().z = coneDir.z - 0.01f;
         }
 
+        float currCutoff = spotLight.getCutOff();
+        if (window.isKeyPressed(GLFW_KEY_Q)) {
+            this.spotLight.setCutOff(0.01f + currCutoff);
+        } else if (window.isKeyPressed(GLFW_KEY_E)) {
+            this.spotLight.setCutOff(currCutoff - 0.01f);
+        }
+
         GameItem gi = gameItems.get(0);
         float c = gi.getRotation().y;
-        gi.setRotation(0, c + 0.2f, 0);
+        gi.setRotation(0, c + 1f, 0);
     }
 
     @Override
@@ -222,7 +229,7 @@ public class DummyGame implements IGameLogic {
         double angRad = Math.toRadians(lightAngle);
         dirLight.getDirection().x = (float) Math.sin(angRad);
         dirLight.getDirection().y = (float) Math.cos(angRad);
-        System.out.print("direction: x: " + spotLight.getConeDirection().x + ", y: " + spotLight.getConeDirection().y + ", z: " + spotLight.getConeDirection().z + "; position: x: " + spotLight.getPointLight().getPosition().x + ", y: " + spotLight.getPointLight().getPosition().y + ", z: " + spotLight.getPointLight().getPosition().z + "\n");
+        //System.out.print("direction: x: " + spotLight.getConeDirection().x + ", y: " + spotLight.getConeDirection().y + ", z: " + spotLight.getConeDirection().z + "; position: x: " + spotLight.getPointLight().getPosition().x + ", y: " + spotLight.getPointLight().getPosition().y + ", z: " + spotLight.getPointLight().getPosition().z + "\n");
 
     }
 
