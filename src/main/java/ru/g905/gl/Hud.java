@@ -17,9 +17,9 @@ import ru.g905.engine.Window;
  */
 public class Hud implements IHud {
 
-    private static final int FONT_COLS = 15;
+    private static final int FONT_COLS = 16;
 
-    private static final int FONT_ROWS = 17;
+    private static final int FONT_ROWS = 16;
 
     private static final String FONT_TEXTURE = "src/main/resources/textures/font_texture.png";
 

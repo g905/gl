@@ -63,22 +63,20 @@ public class TextItem extends GameItem {
             positions.add(tileHeight);
             positions.add(ZPOS);
             textCoords.add((float) col / (float) numCols);
-            textCoords.add((float) row + 1 / (float) numRows);
+            textCoords.add((float) (row + 1) / (float) numRows);
             indices.add(i * VERTICES_PER_QUAD + 1);
 
-            // right bottom
-            positions.add((float) i * tileWidth);
+            positions.add((float) i * tileWidth + tileWidth);
             positions.add(tileHeight);
             positions.add(ZPOS);
-            textCoords.add((float) col + 1 / (float) numCols);
-            textCoords.add((float) row + 1 / (float) numRows);
+            textCoords.add((float) (col + 1) / (float) numCols);
+            textCoords.add((float) (row + 1) / (float) numRows);
             indices.add(i * VERTICES_PER_QUAD + 2);
 
-            // right top
-            positions.add((float) i * tileWidth);
+            positions.add((float) i * tileWidth + tileWidth);
             positions.add(0.0f);
             positions.add(ZPOS);
-            textCoords.add((float) col + 1 / (float) numCols);
+            textCoords.add((float) (col + 1) / (float) numCols);
             textCoords.add((float) row / (float) numRows);
             indices.add(i * VERTICES_PER_QUAD + 3);
 
@@ -104,5 +102,4 @@ public class TextItem extends GameItem {
         this.getMesh().deleteBuffers();
         this.setMesh(buildMesh(texture, numCols, numRows));
     }
-
 }

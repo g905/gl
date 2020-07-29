@@ -89,12 +89,11 @@ public class DummyGame implements IGameLogic {
                 gameItems.add(gamei);
             }
         }
-        /*
-        GameItem gameItem = new GameItem(mesh);
+        /*GameItem gameItem = new GameItem(mesh);
         gameItem.setScale(0.5f);
         gameItem.setPosition(0, 0, -2);
         gameItems.add(gameItem);
-         */
+        gameItems = new GameItem[]{gameItem};*/
 
         sceneLight = new SceneLight();
 
@@ -129,7 +128,7 @@ public class DummyGame implements IGameLogic {
         sceneLight.setDirLight(new DirectionalLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity));
 
         //hud
-        hud = new Hud("test");
+        hud = new Hud("DEMO");
     }
 
     @Override
@@ -259,11 +258,13 @@ public class DummyGame implements IGameLogic {
         double angRad = Math.toRadians(lightAngle);
         dirLight.getDirection().x = (float) Math.sin(angRad);
         dirLight.getDirection().y = (float) Math.cos(angRad);
+        hud.setStatusText("direction x: " + dirLight.getDirection().x);
 
     }
 
     @Override
     public void render(Window window) {
+        hud.updateSize(window);
         renderer.render(window, camera, gameItems, sceneLight, hud);
     }
 
