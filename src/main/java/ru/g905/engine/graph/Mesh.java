@@ -5,13 +5,10 @@
  */
 package ru.g905.engine.graph;
 
-import org.lwjgl.system.MemoryUtil;
-
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
@@ -33,6 +30,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
+import org.lwjgl.system.MemoryUtil;
 
 public class Mesh {
 
@@ -163,6 +161,18 @@ public class Mesh {
         }
 
         // Delete the VAO
+        glBindVertexArray(0);
+        glDeleteVertexArrays(vaoId);
+    }
+
+    public void deleteBuffers() {
+        glDisableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        for (int vboId : vboIdList) {
+            glDeleteBuffers(vboId);
+        }
+
         glBindVertexArray(0);
         glDeleteVertexArrays(vaoId);
     }
