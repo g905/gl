@@ -5,7 +5,9 @@
  */
 package ru.g905.gl;
 
+import java.awt.Font;
 import org.joml.Vector4f;
+import ru.g905.engine.FontTexture;
 import ru.g905.engine.GameItem;
 import ru.g905.engine.IHud;
 import ru.g905.engine.TextItem;
@@ -20,12 +22,8 @@ import ru.g905.engine.graph.ObjLoader;
  */
 public class Hud implements IHud {
 
-    private static final int FONT_COLS = 16;
-
-    private static final int FONT_ROWS = 16;
-
-    private static final String FONT_TEXTURE = "src/main/resources/textures/font_texture.png";
-
+    private static final Font FONT = new Font("Monospace", Font.PLAIN, 20);
+    private static final String CHARSET = "ISO-8859-1";
     private final GameItem[] gameItems;
 
     private final TextItem statusTextItem;
@@ -33,7 +31,8 @@ public class Hud implements IHud {
     private final GameItem compassItem;
 
     public Hud(String statusText) throws Exception {
-        this.statusTextItem = new TextItem(statusText, FONT_TEXTURE, FONT_COLS, FONT_ROWS);
+        FontTexture fontTexture = new FontTexture(FONT, CHARSET);
+        this.statusTextItem = new TextItem(statusText, fontTexture);
         this.statusTextItem.getMesh().getMaterial().setAmbientColor(new Vector4f(1, 1, 1, 1));
 
         Mesh mesh = ObjLoader.loadMesh("models/compass.obj");

@@ -129,7 +129,6 @@ public class DummyGame implements IGameLogic {
 
         //hud
         hud = new Hud("DEMO");
-        hud.getGameItems()[0].setScale(0.5f);
     }
 
     @Override

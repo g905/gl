@@ -41,6 +41,30 @@ public class Texture {
 
         }
 
+        this.id = createTexture(buf);
+        stbi_image_free(buf);
+    }
+
+    public Texture(ByteBuffer imageBuffer) throws Exception {
+        ByteBuffer buf;
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
+
+            buf = stbi_load_from_memory(imageBuffer, w, h, channels, 4);
+            if (buf == null) {
+                throw new Exception("Image file not loaded: " + stbi_failure_reason());
+            }
+
+            width = w.get();
+            height = h.get();
+        }
+        this.id = createTexture(buf);
+        stbi_image_free(buf);
+    }
+
+    private int createTexture(ByteBuffer buf) {
         int textureId = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -55,8 +79,7 @@ public class Texture {
 
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        stbi_image_free(buf);
-        this.id = textureId;
+        return textureId;
     }
 
     public void bind() {
