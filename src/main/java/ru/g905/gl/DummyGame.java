@@ -129,6 +129,7 @@ public class DummyGame implements IGameLogic {
 
         //hud
         hud = new Hud("DEMO");
+        hud.getGameItems()[0].setScale(0.5f);
     }
 
     @Override
@@ -225,6 +226,8 @@ public class DummyGame implements IGameLogic {
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
 
+        hud.rotateCompass(camera.getRotation().y);
+
         spotAngle += spotInc * 0.5f;
         if (spotAngle > 60) {
             spotInc = -1;
@@ -258,7 +261,7 @@ public class DummyGame implements IGameLogic {
         double angRad = Math.toRadians(lightAngle);
         dirLight.getDirection().x = (float) Math.sin(angRad);
         dirLight.getDirection().y = (float) Math.cos(angRad);
-        hud.setStatusText("direction x: " + dirLight.getDirection().x);
+        hud.setStatusText("dir x: " + dirLight.getDirection().x);
 
     }
 

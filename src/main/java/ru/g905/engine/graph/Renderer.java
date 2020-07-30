@@ -79,6 +79,7 @@ public class Renderer {
 
         hudShaderProgram.createUniform("projModelMatrix");
         hudShaderProgram.createUniform("color");
+        hudShaderProgram.createUniform("hasTexture");
     }
 
     public void clear() {
@@ -180,7 +181,7 @@ public class Renderer {
             Matrix4f projModelMatrix = transformation.getOrthoProjModelMatrix(gameItem, ortho);
             hudShaderProgram.setUniform("projModelMatrix", projModelMatrix);
             hudShaderProgram.setUniform("color", gameItem.getMesh().getMaterial().getAmbientСolor());
-
+            hudShaderProgram.setUniform("hasTexture", gameItem.getMesh().getMaterial().isTextured() ? 1 : 0);
             mesh.render();
         }
     }
