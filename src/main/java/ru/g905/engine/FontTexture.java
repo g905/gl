@@ -86,10 +86,10 @@ public class FontTexture {
         }
         g2D.dispose();
 
-        ImageIO.write(img, IMAGE_FORMAT, new java.io.File("/home/zharnikov/TEMP.png"));
+        ImageIO.write(img, IMAGE_FORMAT, new java.io.File("src/main/resources/fonts/" + font.getFontName() + "." + IMAGE_FORMAT));
 
         ByteBuffer buf = null;
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try ( ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             ImageIO.write(img, IMAGE_FORMAT, out);
             out.flush();
             byte[] data = out.toByteArray();

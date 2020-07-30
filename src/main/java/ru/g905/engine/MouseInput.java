@@ -16,10 +16,15 @@ import static org.lwjgl.glfw.GLFW.*;
 public class MouseInput {
 
     private final Vector2d previousPos;
+
     private final Vector2d currentPos;
+
     private final Vector2f displVec;
+
     private boolean inWindow = false;
+
     private boolean leftButtonPressed = false;
+
     private boolean rightButtonPressed = false;
 
     public MouseInput() {
@@ -54,7 +59,6 @@ public class MouseInput {
             double deltay = currentPos.y - previousPos.y;
             boolean rotateX = deltax != 0;
             boolean rotateY = deltay != 0;
-
             if (rotateX) {
                 displVec.y = (float) deltax;
             }
@@ -73,5 +77,4 @@ public class MouseInput {
     public boolean isRightButtonPressed() {
         return rightButtonPressed;
     }
-
 }

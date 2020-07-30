@@ -9,6 +9,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
@@ -31,6 +32,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import org.lwjgl.system.MemoryUtil;
+import ru.g905.engine.GameItem;
 
 public class Mesh {
 
@@ -126,23 +128,35 @@ public class Mesh {
         return vertexCount;
     }
 
-    public void render() {
+    private void initRender() {
         Texture texture = material.getTexture();
         if (texture != null) {
-            // Activate firs texture bank
             glActiveTexture(GL_TEXTURE0);
-            // Bind the texture
             glBindTexture(GL_TEXTURE_2D, texture.getId());
         }
-
-        // Draw the mesh
         glBindVertexArray(getVaoId());
+    }
 
-        glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
-
-        // Restore state
+    private void endRender() {
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
+
+    }
+
+    public void render() {
+        initRender();
+        glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
+        endRender();
+    }
+
+    public void renderList(List<GameItem> gameItems, Consumer<GameItem> consumer) {
+        initRender();
+
+        for (GameItem gameItem : gameItems) {
+            consumer.accept(gameItem);
+            glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
+        }
+        endRender();
     }
 
     public void cleanUp() {

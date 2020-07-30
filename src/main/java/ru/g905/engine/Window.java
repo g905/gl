@@ -113,8 +113,8 @@ public class Window {
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        //glEnable(GL_CULL_FACE);
-        //glCullFace(GL_BACK);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         setIcon("src/main/resources/images/icons/icon5.png");
     }
@@ -122,7 +122,7 @@ public class Window {
     public void setIcon(String path) throws Exception {
         ByteBuffer buff;
 
-        try (MemoryStack stack = MemoryStack.stackPush()) {
+        try ( MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);

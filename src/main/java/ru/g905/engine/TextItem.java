@@ -18,15 +18,18 @@ import ru.g905.engine.graph.Texture;
 public class TextItem extends GameItem {
 
     private static final float ZPOS = 0.0f;
+
     private static final int VERTICES_PER_QUAD = 4;
+
+    private final FontTexture fontTexture;
+
     private String text;
-    private FontTexture fontTexture;
 
     public TextItem(String text, FontTexture fontTexture) throws Exception {
         super();
         this.text = text;
         this.fontTexture = fontTexture;
-        this.setMesh(buildMesh());
+        setMesh(buildMesh());
     }
 
     private Mesh buildMesh() {
@@ -34,49 +37,51 @@ public class TextItem extends GameItem {
         List<Float> textCoords = new ArrayList<>();
         float[] normals = new float[0];
         List<Integer> indices = new ArrayList<>();
-
         char[] characters = text.toCharArray();
-
         int numChars = characters.length;
 
-        float startX = 0;
+        float startx = 0;
         for (int i = 0; i < numChars; i++) {
             FontTexture.CharInfo charInfo = fontTexture.getCharInfo(characters[i]);
 
-            // left top
-            positions.add(startX);
-            positions.add(0.0f);
-            positions.add(ZPOS);
+            // Build a character tile composed by two triangles
+            // Left Top vertex
+            positions.add(startx); // x
+            positions.add(0.0f); //y
+            positions.add(ZPOS); //z
             textCoords.add((float) charInfo.getStartX() / (float) fontTexture.getWidth());
             textCoords.add(0.0f);
             indices.add(i * VERTICES_PER_QUAD);
 
-            // left bottom
-            positions.add(startX);
-            positions.add((float) fontTexture.getHeight());
-            positions.add(ZPOS);
+            // Left Bottom vertex
+            positions.add(startx); // x
+            positions.add((float) fontTexture.getHeight()); //y
+            positions.add(ZPOS); //z
             textCoords.add((float) charInfo.getStartX() / (float) fontTexture.getWidth());
             textCoords.add(1.0f);
             indices.add(i * VERTICES_PER_QUAD + 1);
 
-            positions.add(startX + charInfo.getWidth());
-            positions.add((float) fontTexture.getHeight());
-            positions.add(ZPOS);
+            // Right Bottom vertex
+            positions.add(startx + charInfo.getWidth()); // x
+            positions.add((float) fontTexture.getHeight()); //y
+            positions.add(ZPOS); //z
             textCoords.add((float) (charInfo.getStartX() + charInfo.getWidth()) / (float) fontTexture.getWidth());
             textCoords.add(1.0f);
             indices.add(i * VERTICES_PER_QUAD + 2);
 
-            positions.add(startX + charInfo.getWidth());
-            positions.add(0.0f);
-            positions.add(ZPOS);
+            // Right Top vertex
+            positions.add(startx + charInfo.getWidth()); // x
+            positions.add(0.0f); //y
+            positions.add(ZPOS); //z
             textCoords.add((float) (charInfo.getStartX() + charInfo.getWidth()) / (float) fontTexture.getWidth());
             textCoords.add(0.0f);
             indices.add(i * VERTICES_PER_QUAD + 3);
 
+            // Add indices por left top and bottom right vertices
             indices.add(i * VERTICES_PER_QUAD);
             indices.add(i * VERTICES_PER_QUAD + 2);
 
-            startX += charInfo.getWidth();
+            startx += charInfo.getWidth();
         }
 
         float[] posArr = Utils.listToArray(positions);
@@ -93,7 +98,6 @@ public class TextItem extends GameItem {
 
     public void setText(String text) {
         this.text = text;
-        Texture texture = this.getMesh().getMaterial().getTexture();
         this.getMesh().deleteBuffers();
         this.setMesh(buildMesh());
     }
