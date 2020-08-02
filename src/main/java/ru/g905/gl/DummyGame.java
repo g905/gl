@@ -125,7 +125,7 @@ public class DummyGame implements IGameLogic {
         }*/
         scene.setGameItems(gameItems);
 
-        SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox5.jpg");
+        SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox8.jpg");
         skyBox.setScale(skyBoxScale);
         scene.setSkyBox(skyBox);
 
