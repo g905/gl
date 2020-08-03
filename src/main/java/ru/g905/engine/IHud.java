@@ -5,6 +5,8 @@
  */
 package ru.g905.engine;
 
+import ru.g905.engine.items.GameItem;
+
 /**
  *
  * @author zharnikov

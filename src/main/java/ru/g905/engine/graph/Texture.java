@@ -8,7 +8,6 @@ package ru.g905.engine.graph;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.*;
 import org.lwjgl.system.MemoryStack;
@@ -28,7 +27,7 @@ public class Texture {
     public Texture(String fileName) throws Exception {
         ByteBuffer buf;
         // Load Texture file
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -50,7 +49,7 @@ public class Texture {
     public Texture(ByteBuffer imageBuffer) throws Exception {
         ByteBuffer buf;
         // Load Texture file
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);

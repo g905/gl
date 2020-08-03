@@ -1,5 +1,8 @@
 package ru.g905.engine.graph;
 
+import ru.g905.engine.graph.lights.PointLight;
+import ru.g905.engine.graph.lights.DirectionalLight;
+import ru.g905.engine.graph.lights.SpotLight;
 import java.util.HashMap;
 import java.util.Map;
 import org.joml.Matrix4f;

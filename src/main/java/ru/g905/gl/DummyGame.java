@@ -6,27 +6,26 @@
 package ru.g905.gl;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
-import ru.g905.engine.GameItem;
 import ru.g905.engine.IGameLogic;
 import ru.g905.engine.MouseInput;
 import ru.g905.engine.Scene;
 import ru.g905.engine.SceneLight;
-import ru.g905.engine.SkyBox;
 import ru.g905.engine.Window;
 import ru.g905.engine.graph.Camera;
-import ru.g905.engine.graph.DirectionalLight;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.ObjLoader;
-import ru.g905.engine.graph.PointLight;
 import ru.g905.engine.graph.Renderer;
-import ru.g905.engine.graph.SpotLight;
 import ru.g905.engine.graph.Texture;
+import ru.g905.engine.graph.lights.DirectionalLight;
+import ru.g905.engine.graph.lights.PointLight;
+import ru.g905.engine.graph.lights.SpotLight;
+import ru.g905.engine.items.GameItem;
+import ru.g905.engine.items.SkyBox;
+import ru.g905.engine.items.Terrain;
 
 public class DummyGame implements IGameLogic {
 
@@ -63,6 +62,36 @@ public class DummyGame implements IGameLogic {
 
         scene = new Scene();
 
+        //setMinecraft(scene);
+        float skyBoxScale = 50.0f;
+        float terrainScale = 10;
+        int terrainSize = 3;
+        float minY = -0.1f;
+        float maxY = 0.1f;
+        int textInc = 40;
+        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap.png", "src/main/resources/textures/terrain.png", textInc);
+        scene.setGameItems(terrain.getGameItems());
+
+        SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox8.jpg");
+        skyBox.setScale(skyBoxScale);
+        scene.setSkyBox(skyBox);
+
+        setupLights();
+        /*GameItem gameItem = new GameItem(mesh);
+        gameItem.setScale(0.5f);
+        gameItem.setPosition(0, 0, -2);
+        gameItems.add(gameItem);
+        gameItems = new GameItem[]{gameItem};*/
+
+        //hud
+        hud = new Hud("DEMO");
+
+        camera.getPosition().x = 0.65f;
+        camera.getPosition().y = 1.15f;
+        camera.getPosition().z = 4.34f;
+    }
+
+    private void setMinecraft(Scene scene) throws Exception {
         float reflectance = 1f;
         //Mesh mesh = OBJLoader.loadMesh("/models/bunny.obj");
         //Material material = new Material(new Vector3f(0.2f, 0.5f, 0.5f), reflectance);
@@ -123,31 +152,15 @@ public class DummyGame implements IGameLogic {
             posx = startx;
             posz -= inc;
         }*/
-        scene.setGameItems(gameItems);
-
-        SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox8.jpg");
-        skyBox.setScale(skyBoxScale);
-        scene.setSkyBox(skyBox);
-
-        setupLights();
-        /*GameItem gameItem = new GameItem(mesh);
-        gameItem.setScale(0.5f);
-        gameItem.setPosition(0, 0, -2);
-        gameItems.add(gameItem);
-        gameItems = new GameItem[]{gameItem};*/
-
-        //hud
-        hud = new Hud("DEMO");
-
-        camera.getPosition().x = 0.65f;
-        camera.getPosition().y = 1.15f;
-        camera.getPosition().z = 4.34f;
+        //scene.setGameItems(gameItems);
     }
 
     private void setupLights() {
         SceneLight sceneLight = new SceneLight();
+        scene.setSceneLight(sceneLight);
 
-        sceneLight.setAmbientLight(new Vector3f(1f, 1f, 1f));
+        sceneLight.setAmbientLight(new Vector3f(0.3f, 0.3f, 0.3f));
+        sceneLight.setSkyBoxLight(new Vector3f(1f, 1f, 1f));
 
         //Point light
         Vector3f lightPosition = new Vector3f(0, 0, 1);
@@ -299,19 +312,24 @@ public class DummyGame implements IGameLogic {
         coneDir2.x = (float) (Math.cos(spotAngleRad - 180) / 7);
         coneDir2.z = (float) (Math.sin(spotAngleRad - 180) / 7);
 
-        DirectionalLight dirLight = scene.getSceneLight().getDirLight();
+        SceneLight sceneLight = scene.getSceneLight();
+
+        DirectionalLight dirLight = sceneLight.getDirLight();
         lightAngle += 0.03f;
         if (lightAngle > 90) {
             dirLight.setIntensity(0);
             if (lightAngle >= 360) {
                 lightAngle = -90;
             }
+            sceneLight.getSkyBoxLight().set(0.3f, 0.3f, 0.3f);
         } else if (lightAngle <= -80 || lightAngle >= 80) {
             float factor = 1 - (float) (Math.abs(lightAngle) - 80) / 10.0f;
+            sceneLight.getSkyBoxLight().set(factor, factor, factor);
             dirLight.setIntensity(factor);
             dirLight.getColor().y = Math.max(factor, 0.2f);
             dirLight.getColor().z = Math.max(factor, 0.1f);
         } else {
+            sceneLight.getSkyBoxLight().set(1.0f, 1.0f, 1.0f);
             dirLight.setIntensity(1);
             dirLight.getColor().x = 1;
             dirLight.getColor().y = 1;
@@ -320,7 +338,7 @@ public class DummyGame implements IGameLogic {
         double angRad = Math.toRadians(lightAngle);
         dirLight.getDirection().x = (float) Math.sin(angRad);
         dirLight.getDirection().y = (float) Math.cos(angRad);
-        hud.setStatusText("cone cutoff: " + scene.getSceneLight().getSpotLightList()[0].getCutOff());
+        hud.setStatusText("angle: " + lightAngle);
 
     }
 
@@ -333,11 +351,10 @@ public class DummyGame implements IGameLogic {
     @Override
     public void cleanup() {
         renderer.cleanup();
-        Map<Mesh, List<GameItem>> mapMeshes = scene.getGameMeshes();
-        for (Mesh mesh : mapMeshes.keySet()) {
-            mesh.cleanUp();
+        scene.cleanup();
+        if (hud != null) {
+            hud.cleanup();
         }
-        hud.cleanup();
     }
 
 }

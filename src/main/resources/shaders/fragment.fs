@@ -148,6 +148,5 @@ void main() {
             diffuseSpecularComp += calcSpotLight(spotLights[i], mvVertexPos, mvVertexNormal);
         }
     }
-
     fragColor = ambientC * vec4(ambientLight, 1) + diffuseSpecularComp;
 }

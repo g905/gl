@@ -6,9 +6,9 @@
 package ru.g905.engine;
 
 import org.joml.Vector3f;
-import ru.g905.engine.graph.DirectionalLight;
-import ru.g905.engine.graph.PointLight;
-import ru.g905.engine.graph.SpotLight;
+import ru.g905.engine.graph.lights.DirectionalLight;
+import ru.g905.engine.graph.lights.PointLight;
+import ru.g905.engine.graph.lights.SpotLight;
 
 /**
  *
@@ -18,11 +18,13 @@ public class SceneLight {
 
     private Vector3f ambientLight;
 
+    private Vector3f skyBoxLight;
+
     private PointLight[] pointLightList;
 
     private SpotLight[] spotLightList;
 
-    private DirectionalLight dirLight;
+    private DirectionalLight directionalLight;
 
     public Vector3f getAmbientLight() {
         return ambientLight;
@@ -30,14 +32,6 @@ public class SceneLight {
 
     public void setAmbientLight(Vector3f ambientLight) {
         this.ambientLight = ambientLight;
-    }
-
-    public DirectionalLight getDirLight() {
-        return dirLight;
-    }
-
-    public void setDirLight(DirectionalLight dirLight) {
-        this.dirLight = dirLight;
     }
 
     public PointLight[] getPointLightList() {
@@ -55,4 +49,21 @@ public class SceneLight {
     public void setSpotLightList(SpotLight[] spotLightList) {
         this.spotLightList = spotLightList;
     }
+
+    public DirectionalLight getDirLight() {
+        return directionalLight;
+    }
+
+    public void setDirLight(DirectionalLight directionalLight) {
+        this.directionalLight = directionalLight;
+    }
+
+    public Vector3f getSkyBoxLight() {
+        return skyBoxLight;
+    }
+
+    public void setSkyBoxLight(Vector3f skyBoxLight) {
+        this.skyBoxLight = skyBoxLight;
+    }
+
 }

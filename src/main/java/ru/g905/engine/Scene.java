@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import ru.g905.engine.graph.Mesh;
+import ru.g905.engine.items.GameItem;
+import ru.g905.engine.items.SkyBox;
 
 /**
  *
@@ -31,9 +33,10 @@ public class Scene {
         return meshMap;
     }
 
-    public void setGameItems(ArrayList<GameItem> gameItems) {
-        int numGameItems = gameItems != null ? gameItems.size() : 0;
-        for (GameItem gameItem : gameItems) {
+    public void setGameItems(GameItem[] gameItems) {
+        int numGameItems = gameItems != null ? gameItems.length : 0;
+        for (int i = 0; i < numGameItems; i++) {
+            GameItem gameItem = gameItems[i];
             Mesh mesh = gameItem.getMesh();
             List<GameItem> list = meshMap.get(mesh);
             if (list == null) {
@@ -41,6 +44,12 @@ public class Scene {
                 meshMap.put(mesh, list);
             }
             list.add(gameItem);
+        }
+    }
+
+    public void cleanup() {
+        for (Mesh mesh : meshMap.keySet()) {
+            mesh.cleanUp();
         }
     }
 

@@ -1,4 +1,4 @@
-package ru.g905.engine.graph;
+package ru.g905.engine.graph.lights;
 
 import org.joml.Vector3f;
 

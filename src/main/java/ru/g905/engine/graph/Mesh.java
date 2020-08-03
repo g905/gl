@@ -32,7 +32,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import org.lwjgl.system.MemoryUtil;
-import ru.g905.engine.GameItem;
+import ru.g905.engine.items.GameItem;
 
 public class Mesh {
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ru.g905.engine;
+package ru.g905.engine.items;
 
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;

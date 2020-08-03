@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ru.g905.engine;
+package ru.g905.engine.items;
 
 import java.util.ArrayList;
 import java.util.List;
+import ru.g905.engine.FontTexture;
+import ru.g905.engine.Utils;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.Texture;

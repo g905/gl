@@ -5,17 +5,20 @@
  */
 package ru.g905.engine.graph;
 
+import ru.g905.engine.graph.lights.PointLight;
+import ru.g905.engine.graph.lights.DirectionalLight;
+import ru.g905.engine.graph.lights.SpotLight;
 import java.util.List;
 import java.util.Map;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL11.*;
-import ru.g905.engine.GameItem;
+import ru.g905.engine.items.GameItem;
 import ru.g905.engine.IHud;
 import ru.g905.engine.Scene;
 import ru.g905.engine.SceneLight;
-import ru.g905.engine.SkyBox;
+import ru.g905.engine.items.SkyBox;
 import ru.g905.engine.Utils;
 import ru.g905.engine.Window;
 

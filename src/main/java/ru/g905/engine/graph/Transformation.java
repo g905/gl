@@ -7,7 +7,7 @@ package ru.g905.engine.graph;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import ru.g905.engine.GameItem;
+import ru.g905.engine.items.GameItem;
 
 public class Transformation {
 

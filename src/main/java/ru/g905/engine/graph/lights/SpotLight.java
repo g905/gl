@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ru.g905.engine.graph;
+package ru.g905.engine.graph.lights;
 
 import org.joml.Vector3f;
 
