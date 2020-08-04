@@ -8,13 +8,13 @@ package ru.g905.gl;
 import java.awt.Font;
 import org.joml.Vector4f;
 import ru.g905.engine.FontTexture;
-import ru.g905.engine.items.GameItem;
 import ru.g905.engine.IHud;
-import ru.g905.engine.items.TextItem;
 import ru.g905.engine.Window;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.ObjLoader;
+import ru.g905.engine.items.GameItem;
+import ru.g905.engine.items.TextItem;
 
 /**
  *
@@ -27,6 +27,7 @@ public class Hud implements IHud {
     private final GameItem[] gameItems;
 
     private final TextItem statusTextItem;
+    private final TextItem textItem;
 
     private final GameItem compassItem;
 
@@ -43,11 +44,18 @@ public class Hud implements IHud {
         compassItem.setScale(40f);
         compassItem.setRotation(0f, 0f, 180f);
 
-        gameItems = new GameItem[]{statusTextItem, compassItem};
+        textItem = new TextItem("asdf", fontTexture);
+        textItem.getMesh().getMaterial().setAmbientColor(new Vector4f(1, 1, 1, 1));
+
+        gameItems = new GameItem[]{statusTextItem, compassItem, textItem};
     }
 
     public void setStatusText(String statusText) {
         this.statusTextItem.setText(statusText);
+    }
+
+    public void setTText(String text) {
+        this.textItem.setText(text);
     }
 
     public void rotateCompass(float angle) {
@@ -61,6 +69,7 @@ public class Hud implements IHud {
 
     public void updateSize(Window window) {
         this.statusTextItem.setPosition(10f, window.getHeight() - 50f, 0);
+        this.textItem.setPosition(10f, 0, 0);
         this.compassItem.setPosition(window.getWidth() - 40f, 50f, 0);
     }
 

@@ -44,9 +44,13 @@ public class DummyGame implements IGameLogic {
     private float lightAngle;
 
     private static final float CAMERA_POS_STEP = 0.05f;
+    private static final float FREE_FALL = 2.1f;
 
     private float spotAngle = 0;
+    private float y0 = 0;
     private float spotInc = 2f;
+
+    private Terrain terrain;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -64,15 +68,15 @@ public class DummyGame implements IGameLogic {
 
         //setMinecraft(scene);
         float skyBoxScale = 50.0f;
-        float terrainScale = 10;
-        int terrainSize = 3;
-        float minY = -0.1f;
-        float maxY = 0.1f;
-        int textInc = 40;
-        Terrain terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap.png", "src/main/resources/textures/terrain.png", textInc);
+        float terrainScale = 100f;
+        int terrainSize = 1;
+        float minY = 0.1f;
+        float maxY = 0.4f;
+        int textInc = 20;
+        terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap3.png", "src/main/resources/textures/terrain3.jpg", textInc);
         scene.setGameItems(terrain.getGameItems());
 
-        SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox8.jpg");
+        SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox7.jpg");
         skyBox.setScale(skyBoxScale);
         scene.setSkyBox(skyBox);
 
@@ -86,9 +90,10 @@ public class DummyGame implements IGameLogic {
         //hud
         hud = new Hud("DEMO");
 
-        camera.getPosition().x = 0.65f;
-        camera.getPosition().y = 1.15f;
-        camera.getPosition().z = 4.34f;
+        camera.getPosition().x = 0.0f;
+        camera.getPosition().y = 5.0f;
+        camera.getPosition().z = 0.0f;
+        camera.getRotation().x = 90;
     }
 
     private void setMinecraft(Scene scene) throws Exception {
@@ -287,9 +292,6 @@ public class DummyGame implements IGameLogic {
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
-        // Update camera position
-        camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
-
         // Update camera based on mouse
         if (mouseInput.isRightButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
@@ -303,6 +305,18 @@ public class DummyGame implements IGameLogic {
             spotAngle = 0;
         }
 
+        // Update camera position
+        Vector3f prevPos = new Vector3f(camera.getPosition());
+        camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
+
+        y0 += (FREE_FALL * FREE_FALL) / 2;
+        camera.getPosition().y -= y0 / 600;
+        float height = terrain.getHeight(camera.getPosition()) + 1.0f;
+        if (camera.getPosition().y <= height) {
+            camera.getPosition().y = height;
+            y0 = 0;
+        }
+        hud.setTText("height: " + height + "; y0: " + y0);
         double spotAngleRad = Math.toRadians(spotAngle);
         Vector3f coneDir = scene.getSceneLight().getSpotLightList()[0].getConeDirection();
         Vector3f coneDir2 = scene.getSceneLight().getSpotLightList()[1].getConeDirection();
@@ -322,14 +336,17 @@ public class DummyGame implements IGameLogic {
                 lightAngle = -90;
             }
             sceneLight.getSkyBoxLight().set(0.3f, 0.3f, 0.3f);
+            sceneLight.getAmbientLight().set(0.3f, 0.3f, 0.3f);
         } else if (lightAngle <= -80 || lightAngle >= 80) {
             float factor = 1 - (float) (Math.abs(lightAngle) - 80) / 10.0f;
             sceneLight.getSkyBoxLight().set(factor, factor, factor);
+            sceneLight.getAmbientLight().set(factor, factor, factor);
             dirLight.setIntensity(factor);
             dirLight.getColor().y = Math.max(factor, 0.2f);
             dirLight.getColor().z = Math.max(factor, 0.1f);
         } else {
             sceneLight.getSkyBoxLight().set(1.0f, 1.0f, 1.0f);
+            sceneLight.getAmbientLight().set(1.0f, 1.0f, 1.0f);
             dirLight.setIntensity(1);
             dirLight.getColor().x = 1;
             dirLight.getColor().y = 1;
@@ -338,7 +355,7 @@ public class DummyGame implements IGameLogic {
         double angRad = Math.toRadians(lightAngle);
         dirLight.getDirection().x = (float) Math.sin(angRad);
         dirLight.getDirection().y = (float) Math.cos(angRad);
-        hud.setStatusText("angle: " + lightAngle);
+        hud.setStatusText("x: " + (int) camera.getPosition().x + "; y: " + (int) camera.getPosition().y + "; z: " + (int) camera.getPosition().z);
 
     }
 
