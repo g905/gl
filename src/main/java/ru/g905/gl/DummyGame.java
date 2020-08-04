@@ -23,6 +23,7 @@ import ru.g905.engine.graph.Texture;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.graph.lights.PointLight;
 import ru.g905.engine.graph.lights.SpotLight;
+import ru.g905.engine.graph.weather.Fog;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.SkyBox;
 import ru.g905.engine.items.Terrain;
@@ -43,12 +44,14 @@ public class DummyGame implements IGameLogic {
 
     private float lightAngle;
 
-    private static final float CAMERA_POS_STEP = 0.05f;
-    private static final float FREE_FALL = 2.1f;
+    private static final float CAMERA_POS_STEP = 0.1f;
+    private static final float FREE_FALL = 3.2f;
 
     private float spotAngle = 0;
     private float y0 = 0;
     private float spotInc = 2f;
+
+    private Vector3f[] l;
 
     private Terrain terrain;
 
@@ -68,11 +71,11 @@ public class DummyGame implements IGameLogic {
 
         //setMinecraft(scene);
         float skyBoxScale = 50.0f;
-        float terrainScale = 100f;
-        int terrainSize = 1;
-        float minY = 0.1f;
-        float maxY = 0.4f;
-        int textInc = 20;
+        float terrainScale = 100;
+        int terrainSize = 3;
+        float minY = -0.1f;
+        float maxY = 0.1f;
+        int textInc = 10;
         terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap3.png", "src/main/resources/textures/terrain3.jpg", textInc);
         scene.setGameItems(terrain.getGameItems());
 
@@ -86,6 +89,8 @@ public class DummyGame implements IGameLogic {
         gameItem.setPosition(0, 0, -2);
         gameItems.add(gameItem);
         gameItems = new GameItem[]{gameItem};*/
+
+        scene.setFog(new Fog(true, new Vector3f(0.6f, 0.6f, 0.5f), 0.12f));
 
         //hud
         hud = new Hud("DEMO");
@@ -169,7 +174,7 @@ public class DummyGame implements IGameLogic {
 
         //Point light
         Vector3f lightPosition = new Vector3f(0, 0, 1);
-        float lightIntensity = 5.0f;
+        float lightIntensity = 1.0f;
 
         PointLight pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
@@ -317,6 +322,7 @@ public class DummyGame implements IGameLogic {
             y0 = 0;
         }
         hud.setTText("height: " + height + "; y0: " + y0);
+
         double spotAngleRad = Math.toRadians(spotAngle);
         Vector3f coneDir = scene.getSceneLight().getSpotLightList()[0].getConeDirection();
         Vector3f coneDir2 = scene.getSceneLight().getSpotLightList()[1].getConeDirection();
@@ -329,14 +335,14 @@ public class DummyGame implements IGameLogic {
         SceneLight sceneLight = scene.getSceneLight();
 
         DirectionalLight dirLight = sceneLight.getDirLight();
-        lightAngle += 0.03f;
+        lightAngle += 0.93f;
         if (lightAngle > 90) {
-            dirLight.setIntensity(0);
+            dirLight.setIntensity(1f);
             if (lightAngle >= 360) {
                 lightAngle = -90;
             }
-            sceneLight.getSkyBoxLight().set(0.3f, 0.3f, 0.3f);
-            sceneLight.getAmbientLight().set(0.3f, 0.3f, 0.3f);
+            sceneLight.getSkyBoxLight().set(0.2f, 0.2f, 0.2f);
+            sceneLight.getAmbientLight().set(0.2f, 0.2f, 0.2f);
         } else if (lightAngle <= -80 || lightAngle >= 80) {
             float factor = 1 - (float) (Math.abs(lightAngle) - 80) / 10.0f;
             sceneLight.getSkyBoxLight().set(factor, factor, factor);

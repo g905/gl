@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import ru.g905.engine.graph.Mesh;
+import ru.g905.engine.graph.weather.Fog;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.SkyBox;
 
@@ -25,8 +26,11 @@ public class Scene {
 
     private SceneLight sceneLight;
 
+    private Fog fog;
+
     public Scene() {
         meshMap = new HashMap();
+        fog = Fog.NOFOG;
     }
 
     public Map<Mesh, List<GameItem>> getGameMeshes() {
@@ -67,6 +71,14 @@ public class Scene {
 
     public void setSceneLight(SceneLight sceneLight) {
         this.sceneLight = sceneLight;
+    }
+
+    public Fog getFog() {
+        return fog;
+    }
+
+    public void setFog(Fog fog) {
+        this.fog = fog;
     }
 
 }

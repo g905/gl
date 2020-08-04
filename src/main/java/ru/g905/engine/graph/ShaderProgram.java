@@ -1,8 +1,5 @@
 package ru.g905.engine.graph;
 
-import ru.g905.engine.graph.lights.PointLight;
-import ru.g905.engine.graph.lights.DirectionalLight;
-import ru.g905.engine.graph.lights.SpotLight;
 import java.util.HashMap;
 import java.util.Map;
 import org.joml.Matrix4f;
@@ -10,6 +7,10 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL20.*;
 import org.lwjgl.system.MemoryStack;
+import ru.g905.engine.graph.lights.DirectionalLight;
+import ru.g905.engine.graph.lights.PointLight;
+import ru.g905.engine.graph.lights.SpotLight;
+import ru.g905.engine.graph.weather.Fog;
 
 public class ShaderProgram {
 
@@ -76,6 +77,12 @@ public class ShaderProgram {
         createUniform(uniformName + ".specular");
         createUniform(uniformName + ".hasTexture");
         createUniform(uniformName + ".reflectance");
+    }
+
+    public void createFogUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".fogActive");
+        createUniform(uniformName + ".color");
+        createUniform(uniformName + ".density");
     }
 
     public void setUniform(String uniformName, Matrix4f value) {
@@ -152,6 +159,12 @@ public class ShaderProgram {
         setUniform(uniformName + ".color", dirLight.getColor());
         setUniform(uniformName + ".direction", dirLight.getDirection());
         setUniform(uniformName + ".intensity", dirLight.getIntensity());
+    }
+
+    public void setUniform(String uniformName, Fog fog) {
+        setUniform(uniformName + ".fogActive", fog.isFogActive() ? 1 : 0);
+        setUniform(uniformName + ".color", fog.getColor());
+        setUniform(uniformName + ".density", fog.getDensity());
     }
 
     public void createVertexShader(String shaderCode) throws Exception {

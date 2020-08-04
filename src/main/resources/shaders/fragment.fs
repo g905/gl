@@ -9,6 +9,13 @@ out vec4 fragColor;
 const int MAX_POINT_LIGHTS = 5;
 const int MAX_SPOT_LIGHTS = 5;
 
+struct Fog {
+
+    int fogActive;
+    vec3 color;
+    float density;
+};
+
 struct Attenuation {
 
     float constant;
@@ -54,6 +61,7 @@ uniform Material material;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform DirectionalLight dirLight;
+uniform Fog fog;
 
 vec4 ambientC;
 vec4 diffuseC;
@@ -129,6 +137,17 @@ vec4 calcDirectionalLight(DirectionalLight light, vec3 position, vec3 normal) {
     return calcLightColor(light.color, light.intensity, position, normalize(light.direction), normal);
 }
 
+vec4 calcFog(vec3 pos, vec4 color, Fog fog, vec3 ambientLight, DirectionalLight dirLight) {
+
+    vec3 fogColor = fog.color * (ambientLight + dirLight.color * dirLight.intensity);
+    float distance = length(pos);
+    float fogFactor = 1.0 / exp((distance * fog.density) * (distance * fog.density));
+    fogFactor = clamp(fogFactor, 0.0, 1.0);
+
+    vec3 resultColor = mix(fog.color, color.xyz, fogFactor);
+    return vec4(resultColor.xyz, color.w);
+}
+
 void main() {
 
     setupcolors(material, outTexCoord);
@@ -149,4 +168,8 @@ void main() {
         }
     }
     fragColor = ambientC * vec4(ambientLight, 1) + diffuseSpecularComp;
+    if(fog.fogActive == 1) {
+
+        fragColor = calcFog(mvVertexPos, fragColor, fog, ambientLight, dirLight);
+    }
 }
