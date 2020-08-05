@@ -58,6 +58,12 @@ public class GameItem {
         this.rotation.z = z;
     }
 
+    public void setRotation(Vector3f v) {
+        this.rotation.x = v.x;
+        this.rotation.y = v.y;
+        this.rotation.z = v.z;
+    }
+
     public Mesh getMesh() {
         return mesh;
     }

@@ -7,6 +7,7 @@ package ru.g905.gl;
 
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import static org.lwjgl.glfw.GLFW.*;
 import ru.g905.engine.IGameLogic;
 import ru.g905.engine.MouseInput;
@@ -49,6 +50,8 @@ public class DummyGame implements IGameLogic {
     private float spotAngle = 0;
     private float y0 = 0;
     private float spotInc = 2f;
+
+    private GameItem g;
 
     private Vector3f[] l;
 
@@ -95,8 +98,8 @@ public class DummyGame implements IGameLogic {
         int terrainSize = 1;
         float minY = -0.1f;
         float maxY = 0.1f;
-        int textInc = 20;
-        terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap3.png", "src/main/resources/textures/terrain3.jpg", textInc);
+        int textInc = 10;
+        terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap3.png", "src/main/resources/textures/terrain7.jpg", textInc);
         scene.setGameItems(terrain.getGameItems());
         scene.setGameItems(new GameItem[]{quadItem, quadItem2});
 
@@ -117,7 +120,7 @@ public class DummyGame implements IGameLogic {
         camera.getRotation().x = 90;
     }
 
-    private void setupLights() {
+    private void setupLights() throws Exception {
         SceneLight sceneLight = new SceneLight();
         scene.setSceneLight(sceneLight);
 
@@ -138,7 +141,7 @@ public class DummyGame implements IGameLogic {
         lightPosition = new Vector3f(10f, 30.0f, 5f);
         PointLight sl_pointLight = new PointLight(new Vector3f(1, 0, 0), lightPosition, 14.0f);
         PointLight sl_pointLight2 = new PointLight(new Vector3f(0, 1, 0), lightPosition, lightIntensity);
-        PointLight sl_pointLight3 = new PointLight(new Vector3f(0, 0, 1), new Vector3f(-5, -26, 0), 5.0f);
+        PointLight sl_pointLight3 = new PointLight(new Vector3f(0.922f, 0.204f, 0.537f), new Vector3f(0, -26, 0), 2.0f);
 
         att = new PointLight.Attenuation(0.0f, 0.0f, 0.001f);
         sl_pointLight.setAttenuation(att);
@@ -152,6 +155,21 @@ public class DummyGame implements IGameLogic {
         SpotLight sl3 = new SpotLight(sl_pointLight3, coneDir, cutoff);
 
         sceneLight.setSpotLightList(new SpotLight[]{spotLight, new SpotLight(sl2), new SpotLight(sl3)});
+
+        Mesh quadMesh1 = ObjLoader.loadMesh("models/cube.obj");
+        //Texture texture = new Texture("src/main/resources/textures/grassblock.png");
+        Material quadMaterial = new Material();
+        quadMesh1.setMaterial(quadMaterial);
+
+        g = new GameItem(quadMesh1);
+        g.setScale(0.3f);
+        g.setRotation(sl3.getConeDirection().x, sl3.getConeDirection().y, sl3.getConeDirection().z);
+
+        g.setPosition(sl3.getPointLight().getPosition().x, sl3.getPointLight().getPosition().y, sl3.getPointLight().getPosition().z);
+
+        g.getMesh().getMaterial().setAmbientColor(new Vector4f(0.922f, 0.204f, 0.537f, 1.0f));
+
+        scene.setGameItems(new GameItem[]{g});
 
         lightPosition = new Vector3f(-1, 0, 0);
         sceneLight.setDirLight(new DirectionalLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity));
@@ -178,8 +196,11 @@ public class DummyGame implements IGameLogic {
 
         SceneLight sl = scene.getSceneLight();
         SpotLight s = sl.getSpotLightList()[2];
+
         float oldCutoff = s.getCutOff();
         Vector3f p = s.getPointLight().getPosition();
+        g.setPosition(p.x, p.y, p.z);
+        //g.setRotation(s.getConeDirection().x, s.getConeDirection().y, s.getConeDirection().z);
         if (window.isKeyPressed(GLFW_KEY_L)) {
             s.getPointLight().setPosition(new Vector3f(p.x + 0.1f, 0, 0));
         } else if (window.isKeyPressed(GLFW_KEY_O)) {
@@ -230,10 +251,16 @@ public class DummyGame implements IGameLogic {
         coneDir2.z = (float) (Math.sin(spotAngleRad - 180) / 7);
 
         Vector3f pos3 = scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition();
-        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().z = (float) (Math.cos(spotAngleRad));
-        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().x = (float) (Math.sin(spotAngleRad));
+        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().z = (float) (Math.cos(spotAngleRad) * 3);
+        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().x = (float) (Math.sin(spotAngleRad) * 3);
+        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().y += (float) (Math.sin(spotAngleRad * 2) / 3);
 
-        scene.getSceneLight().getSpotLightList()[2].getConeDirection().z = (float) (Math.cos(spotAngleRad));
+        Vector3f v = scene.getSceneLight().getSpotLightList()[2].getConeDirection();
+        scene.getSceneLight().getSpotLightList()[2].getConeDirection().x = (float) Math.cos(spotAngleRad);
+        scene.getSceneLight().getSpotLightList()[2].getConeDirection().y = (float) Math.sin(spotAngleRad);
+
+        Vector3f gp = g.getRotation();
+        g.setRotation(gp.add(scene.getSceneLight().getSpotLightList()[2].getConeDirection()));
 
         SceneLight sceneLight = scene.getSceneLight();
 

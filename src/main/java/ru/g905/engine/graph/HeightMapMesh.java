@@ -81,8 +81,8 @@ public class HeightMapMesh {
         float[] textCoordsArr = Utils.listToArray(textCoords);
         float[] normalsArr = calcNormals(posArr, width, height);
         this.mesh = new Mesh(posArr, textCoordsArr, normalsArr, indicesArr);
-        Material material = new Material(texture, 3.0f);
-        material.setNormalMap(new Texture("src/main/resources/textures/rock_normals.png"));
+        Material material = new Material(texture, 0.2f);
+        material.setNormalMap(new Texture("src/main/resources/textures/terrain7_normal.png"));
         mesh.setMaterial(material);
     }
 
