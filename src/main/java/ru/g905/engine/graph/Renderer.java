@@ -92,6 +92,8 @@ public class Renderer {
         sceneShaderProgram.createDirectionalLightUniform("dirLight");
 
         sceneShaderProgram.createFogUniform("fog");
+
+        sceneShaderProgram.createUniform("normalMap");
     }
 
     private void setupHudShader() throws Exception {
@@ -174,6 +176,8 @@ public class Renderer {
         }
 
         sceneShaderProgram.setUniform("fog", scene.getFog());
+
+        sceneShaderProgram.setUniform("normalMap", 1);
 
         sceneShaderProgram.unbind();
     }

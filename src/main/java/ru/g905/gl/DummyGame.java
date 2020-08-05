@@ -5,7 +5,6 @@
  */
 package ru.g905.gl;
 
-import java.util.ArrayList;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
@@ -69,28 +68,45 @@ public class DummyGame implements IGameLogic {
 
         scene = new Scene();
 
-        //setMinecraft(scene);
+        float reflectance = 0.65f;
+        Texture normalMap = new Texture("src/main/resources/textures/rock_normals.png");
+
+        Mesh quadMesh1 = ObjLoader.loadMesh("models/quad.obj");
+        Texture texture = new Texture("src/main/resources/textures/rock.png");
+        Material quadMaterial = new Material(texture, reflectance);
+        quadMesh1.setMaterial(quadMaterial);
+
+        GameItem quadItem = new GameItem(quadMesh1);
+        quadItem.setPosition(0, -27, -2f);
+        quadItem.setScale(2.0f);
+        quadItem.setRotation(0, 90, 0);
+
+        Mesh quadMesh2 = ObjLoader.loadMesh("models/quad.obj");
+        Material quMaterial2 = new Material(texture, reflectance);
+        quMaterial2.setNormalMap(normalMap);
+        quadMesh2.setMaterial(quMaterial2);
+        GameItem quadItem2 = new GameItem(quadMesh2);
+        quadItem2.setPosition(0, -27, 2f);
+        quadItem2.setScale(2.0f);
+        quadItem2.setRotation(0, 90, 0);
+
         float skyBoxScale = 50.0f;
         float terrainScale = 100;
-        int terrainSize = 3;
+        int terrainSize = 1;
         float minY = -0.1f;
         float maxY = 0.1f;
-        int textInc = 10;
+        int textInc = 20;
         terrain = new Terrain(terrainSize, terrainScale, minY, maxY, "src/main/resources/textures/heightmap3.png", "src/main/resources/textures/terrain3.jpg", textInc);
         scene.setGameItems(terrain.getGameItems());
+        scene.setGameItems(new GameItem[]{quadItem, quadItem2});
 
         SkyBox skyBox = new SkyBox("models/skybox_1.obj", "src/main/resources/textures/skybox7.jpg");
         skyBox.setScale(skyBoxScale);
         scene.setSkyBox(skyBox);
 
         setupLights();
-        /*GameItem gameItem = new GameItem(mesh);
-        gameItem.setScale(0.5f);
-        gameItem.setPosition(0, 0, -2);
-        gameItems.add(gameItem);
-        gameItems = new GameItem[]{gameItem};*/
 
-        scene.setFog(new Fog(true, new Vector3f(0.6f, 0.6f, 0.5f), 0.12f));
+        scene.setFog(new Fog(true, new Vector3f(0.5f, 0.5f, 0.5f), 0.02f));
 
         //hud
         hud = new Hud("DEMO");
@@ -99,70 +115,6 @@ public class DummyGame implements IGameLogic {
         camera.getPosition().y = 5.0f;
         camera.getPosition().z = 0.0f;
         camera.getRotation().x = 90;
-    }
-
-    private void setMinecraft(Scene scene) throws Exception {
-        float reflectance = 1f;
-        //Mesh mesh = OBJLoader.loadMesh("/models/bunny.obj");
-        //Material material = new Material(new Vector3f(0.2f, 0.5f, 0.5f), reflectance);
-
-        Mesh mesh = ObjLoader.loadMesh("models/cube.obj");
-        Texture texture = new Texture("src/main/resources/textures/grassblock.png");
-        Material material = new Material(texture, reflectance);
-        mesh.setMaterial(material);
-
-        float blockScale = 0.5f;
-        float skyBoxScale = 150.0f;
-        float extension = 2.0f;
-
-        float startx = extension * (-skyBoxScale + blockScale);
-        float startz = extension * (skyBoxScale - blockScale);
-        float starty = -1.0f;
-        float incv = blockScale * 2;
-
-        float posx = startx;
-        float posz = startz;
-        float incy = 0.0f;
-        int NUM_ROWS = (int) (extension * skyBoxScale * 2 / incv);
-        int NUM_COLS = (int) (extension * skyBoxScale * 2 / incv);
-        ArrayList<GameItem> gameItems = new ArrayList<>();
-
-        float z = 0;
-        float inc = 0.1f;
-        float inc2 = 0.1f;
-        for (int i = 0; i < 100; ++i) {
-            if (i < 50) {
-                z += inc;
-            } else {
-                z -= inc;
-            }
-            for (int j = 0; j < 100; ++j) {
-                if (j < 50) {
-                    z += inc2;
-                } else {
-                    z -= inc2;
-                }
-                GameItem gamei = new GameItem(mesh);
-                gamei.setPosition(i, z * z, j);
-                gamei.setScale(0.5f);
-                gameItems.add(gamei);
-            }
-        }
-        /*
-        for (int i = 0; i < NUM_ROWS; i++) {
-            for (int j = 0; j < NUM_COLS; j++) {
-                GameItem gameItem = new GameItem(mesh);
-                gameItem.setScale(blockScale);
-                incy = Math.random() > 0.9f ? blockScale * 2 : 0f;
-                gameItem.setPosition(posx, starty + incy, posz);
-                gameItems[i * NUM_COLS + j] = gameItem;
-
-                posx += inc;
-            }
-            posx = startx;
-            posz -= inc;
-        }*/
-        //scene.setGameItems(gameItems);
     }
 
     private void setupLights() {
@@ -186,6 +138,8 @@ public class DummyGame implements IGameLogic {
         lightPosition = new Vector3f(10f, 30.0f, 5f);
         PointLight sl_pointLight = new PointLight(new Vector3f(1, 0, 0), lightPosition, 14.0f);
         PointLight sl_pointLight2 = new PointLight(new Vector3f(0, 1, 0), lightPosition, lightIntensity);
+        PointLight sl_pointLight3 = new PointLight(new Vector3f(0, 0, 1), new Vector3f(-5, -26, 0), 5.0f);
+
         att = new PointLight.Attenuation(0.0f, 0.0f, 0.001f);
         sl_pointLight.setAttenuation(att);
         Vector3f coneDir = new Vector3f(0, -1, 0);
@@ -195,11 +149,12 @@ public class DummyGame implements IGameLogic {
 
         SpotLight sl2 = new SpotLight(sl_pointLight2, coneDir, cutoff);
 
-        sceneLight.setSpotLightList(new SpotLight[]{spotLight, new SpotLight(sl2)});
+        SpotLight sl3 = new SpotLight(sl_pointLight3, coneDir, cutoff);
+
+        sceneLight.setSpotLightList(new SpotLight[]{spotLight, new SpotLight(sl2), new SpotLight(sl3)});
 
         lightPosition = new Vector3f(-1, 0, 0);
         sceneLight.setDirLight(new DirectionalLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity));
-        scene.setSceneLight(sceneLight);
     }
 
     @Override
@@ -221,78 +176,20 @@ public class DummyGame implements IGameLogic {
             cameraInc.y = 1;
         }
 
-        SceneLight sceneLight = scene.getSceneLight();
-
-        Vector3f lightPos = sceneLight.getSpotLightList()[0].getPointLight().getPosition();
-        if (window.isKeyPressed(GLFW_KEY_N)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().z = lightPos.z + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_M)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().z = lightPos.z - 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_J)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().y = lightPos.y + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_H)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().y = lightPos.y - 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_U)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().x = lightPos.x + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_Y)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().x = lightPos.x - 0.1f;
-        }
-        /*
-        float plLightPos = pointLight.getPosition().z;
-        if (window.isKeyPressed(GLFW_KEY_K)) {
-            this.pointLight.getPosition().z = plLightPos + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_L)) {
-            this.pointLight.getPosition().z = plLightPos - 0.1f;
-        }
-
-        Vector3f lightPos = spotLight.getPointLight().getPosition();
-        if (window.isKeyPressed(GLFW_KEY_N)) {
-            this.spotLight.getPointLight().getPosition().z = lightPos.z + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_M)) {
-            this.spotLight.getPointLight().getPosition().z = lightPos.z - 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_J)) {
-            this.spotLight.getPointLight().getPosition().y = lightPos.y + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_H)) {
-            this.spotLight.getPointLight().getPosition().y = lightPos.y - 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_U)) {
-            this.spotLight.getPointLight().getPosition().x = lightPos.x + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_Y)) {
-            this.spotLight.getPointLight().getPosition().x = lightPos.x - 0.1f;
-        }
-
-        Vector3f coneDir = spotLight.getConeDirection();
-        if (window.isKeyPressed(GLFW_KEY_R)) {
-            this.spotLight.getConeDirection().x = coneDir.x + 0.01f;
+        SceneLight sl = scene.getSceneLight();
+        SpotLight s = sl.getSpotLightList()[2];
+        float oldCutoff = s.getCutOff();
+        Vector3f p = s.getPointLight().getPosition();
+        if (window.isKeyPressed(GLFW_KEY_L)) {
+            s.getPointLight().setPosition(new Vector3f(p.x + 0.1f, 0, 0));
+        } else if (window.isKeyPressed(GLFW_KEY_O)) {
+            s.getConeDirection().x = s.getConeDirection().x + 0.01f;
         } else if (window.isKeyPressed(GLFW_KEY_T)) {
-            this.spotLight.getConeDirection().x = coneDir.x - 0.01f;
-        } else if (window.isKeyPressed(GLFW_KEY_F)) {
-            this.spotLight.getConeDirection().y = coneDir.y + 0.01f;
-        } else if (window.isKeyPressed(GLFW_KEY_G)) {
-            this.spotLight.getConeDirection().y = coneDir.y - 0.01f;
-        } else if (window.isKeyPressed(GLFW_KEY_C)) {
-            this.spotLight.getConeDirection().z = coneDir.z + 0.01f;
-        } else if (window.isKeyPressed(GLFW_KEY_V)) {
-            this.spotLight.getConeDirection().z = coneDir.z - 0.01f;
+            s.setCutOff(oldCutoff + 0.1f);
+        } else if (window.isKeyPressed(GLFW_KEY_R)) {
+            s.setCutOff(oldCutoff - 0.1f);
         }
 
-        float currCutoff = spotLight.getCutOff();
-        if (window.isKeyPressed(GLFW_KEY_Q)) {
-            this.spotLight.setCutOff(0.01f + currCutoff);
-        } else if (window.isKeyPressed(GLFW_KEY_E)) {
-            this.spotLight.setCutOff(currCutoff - 0.01f);
-        }
-         */
-
-        Vector3f sl = sceneLight.getSpotLightList()[0].getPointLight().getPosition();
-        if (window.isKeyPressed(GLFW_KEY_R)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().x = sl.x + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_T)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().x = sl.x - 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_Y)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().z = sl.z + 0.1f;
-        } else if (window.isKeyPressed(GLFW_KEY_U)) {
-            sceneLight.getSpotLightList()[0].getPointLight().getPosition().z = sl.z - 0.1f;
-        }
     }
 
     @Override
@@ -332,27 +229,31 @@ public class DummyGame implements IGameLogic {
         coneDir2.x = (float) (Math.cos(spotAngleRad - 180) / 7);
         coneDir2.z = (float) (Math.sin(spotAngleRad - 180) / 7);
 
+        Vector3f pos3 = scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition();
+        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().z = (float) (Math.cos(spotAngleRad));
+        scene.getSceneLight().getSpotLightList()[2].getPointLight().getPosition().x = (float) (Math.sin(spotAngleRad));
+
+        scene.getSceneLight().getSpotLightList()[2].getConeDirection().z = (float) (Math.cos(spotAngleRad));
+
         SceneLight sceneLight = scene.getSceneLight();
 
         DirectionalLight dirLight = sceneLight.getDirLight();
-        lightAngle += 0.93f;
+        sceneLight.getAmbientLight().set(0.6f, 0.6f, 0.6f);
+        lightAngle += 0.1f;
         if (lightAngle > 90) {
             dirLight.setIntensity(1f);
-            if (lightAngle >= 360) {
+            if (lightAngle >= 270) {
                 lightAngle = -90;
             }
-            sceneLight.getSkyBoxLight().set(0.2f, 0.2f, 0.2f);
             sceneLight.getAmbientLight().set(0.2f, 0.2f, 0.2f);
         } else if (lightAngle <= -80 || lightAngle >= 80) {
             float factor = 1 - (float) (Math.abs(lightAngle) - 80) / 10.0f;
-            sceneLight.getSkyBoxLight().set(factor, factor, factor);
-            sceneLight.getAmbientLight().set(factor, factor, factor);
-            dirLight.setIntensity(factor);
+            sceneLight.getAmbientLight().set(Math.max(factor, 0.2f), Math.max(factor, 0.2f), Math.max(factor, 0.2f));
+            dirLight.setIntensity(Math.max(factor, 0.2f));
             dirLight.getColor().y = Math.max(factor, 0.2f);
             dirLight.getColor().z = Math.max(factor, 0.1f);
         } else {
-            sceneLight.getSkyBoxLight().set(1.0f, 1.0f, 1.0f);
-            sceneLight.getAmbientLight().set(1.0f, 1.0f, 1.0f);
+            sceneLight.getAmbientLight().set(0.6f, 0.6f, 0.6f);
             dirLight.setIntensity(1);
             dirLight.getColor().x = 1;
             dirLight.getColor().y = 1;
