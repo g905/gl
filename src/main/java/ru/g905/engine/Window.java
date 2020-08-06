@@ -62,6 +62,14 @@ public class Window {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
+        boolean maximized = false;
+        if (width == 0 || height == 0) {
+            width = 100;
+            height = 100;
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+            maximized = true;
+        }
+
         // Create the window
         windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
         if (windowHandle == NULL) {
@@ -82,14 +90,18 @@ public class Window {
             }
         });
 
-        // Get the resolution of the primary monitor
-        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        // Center our window
-        glfwSetWindowPos(
-                windowHandle,
-                (vidmode.width() - width) / 2,
-                (vidmode.height() - height) / 2
-        );
+        if (maximized) {
+            glfwMaximizeWindow(windowHandle);
+        } else {
+            // Get the resolution of the primary monitor
+            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            // Center our window
+            glfwSetWindowPos(
+                    windowHandle,
+                    (vidmode.width() - width) / 2,
+                    (vidmode.height() - height) / 2
+            );
+        }
 
         // Make the OpenGL context current
         glfwMakeContextCurrent(windowHandle);
@@ -122,7 +134,7 @@ public class Window {
     public void setIcon(String path) throws Exception {
         ByteBuffer buff;
 
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);

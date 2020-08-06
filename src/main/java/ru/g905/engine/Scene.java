@@ -73,10 +73,16 @@ public class Scene {
         this.sceneLight = sceneLight;
     }
 
+    /**
+     * @return the fog
+     */
     public Fog getFog() {
         return fog;
     }
 
+    /**
+     * @param fog the fog to set
+     */
     public void setFog(Fog fog) {
         this.fog = fog;
     }
