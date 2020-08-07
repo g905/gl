@@ -17,11 +17,13 @@ import ru.g905.engine.Window;
 import ru.g905.engine.graph.Camera;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
-import ru.g905.engine.graph.ObjLoader;
 import ru.g905.engine.graph.Renderer;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.Terrain;
+import ru.g905.engine.loaders.md5.MD5Loader;
+import ru.g905.engine.loaders.md5.MD5Model;
+import ru.g905.engine.loaders.obj.ObjLoader;
 
 public class DummyGame implements IGameLogic {
 
@@ -63,26 +65,35 @@ public class DummyGame implements IGameLogic {
 
         // Setup  GameItems
         float reflectance = 1f;
+        /*float reflectance = 1f;
         Mesh cubeMesh = ObjLoader.loadMesh("models/cube.obj");
         Material cubeMaterial = new Material(new Vector4f(0, 1, 0, 1), reflectance);
         cubeMesh.setMaterial(cubeMaterial);
         cubeGameItem = new GameItem(cubeMesh);
         cubeGameItem.setPosition(0, 0, 0);
-        cubeGameItem.setScale(0.5f);
+        cubeGameItem.setScale(0.5f);*/
+        MD5Model md5Model = MD5Model.parse("models/monster.md5mesh");
+        GameItem monster = MD5Loader.process(md5Model, new Vector4f(1, 1, 1, 1));
+        monster.setScale(0.05f);
+        monster.setRotation(90, 0, 0);
 
         Mesh quadMesh = ObjLoader.loadMesh("models/plane.obj");
         Material quadMaterial = new Material(new Vector4f(0.0f, 0.0f, 1.0f, 10.0f), reflectance);
         quadMesh.setMaterial(quadMaterial);
         GameItem quadGameItem = new GameItem(quadMesh);
         quadGameItem.setPosition(0, -1, 0);
-        quadGameItem.setScale(2.5f);
+        quadGameItem.setScale(3.5f);
 
-        scene.setGameItems(new GameItem[]{cubeGameItem, quadGameItem});
+        scene.setGameItems(new GameItem[]{monster, quadGameItem});
 
         // Setup Lights
         setupLights();
 
-        camera.getPosition().z = 2;
+        camera.getPosition().x = 0.25f;
+        camera.getPosition().y = 6.5f;
+        camera.getPosition().z = 6.5f;
+        camera.getRotation().x = 25;
+        camera.getRotation().y = -1;
         hud = new Hud("LightAngle:");
     }
 
@@ -148,13 +159,12 @@ public class DummyGame implements IGameLogic {
             camera.setPosition(prevPos.x, prevPos.y, prevPos.z);
         }
 
-        float rotY = cubeGameItem.getRotation().y;
+        /*        float rotY = cubeGameItem.getRotation().y;
         rotY += 0.5f;
         if (rotY >= 360) {
             rotY -= 360;
         }
-        cubeGameItem.getRotation().y = rotY;
-
+        cubeGameItem.getRotation().y = rotY;*/
         lightAngle += angleInc;
         if (lightAngle < 0) {
             lightAngle = 0;

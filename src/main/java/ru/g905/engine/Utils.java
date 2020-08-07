@@ -58,4 +58,14 @@ public class Utils {
         }
         return floatArr;
     }
+
+    public static boolean existsResourceFile(String fileName) {
+        boolean result;
+        try (InputStream is = Utils.class.getResourceAsStream(fileName)) {
+            result = is != null;
+        } catch (Exception excp) {
+            result = false;
+        }
+        return result;
+    }
 }

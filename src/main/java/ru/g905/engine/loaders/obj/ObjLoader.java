@@ -3,13 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ru.g905.engine.graph;
+package ru.g905.engine.loaders.obj;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import ru.g905.engine.Utils;
+import ru.g905.engine.graph.Mesh;
 
 /**
  *

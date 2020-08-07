@@ -14,7 +14,7 @@ import ru.g905.engine.graph.Mesh;
  */
 public class GameItem {
 
-    private Mesh mesh;
+    private Mesh[] meshes;
     private final Vector3f position;
     private float scale;
     private final Vector3f rotation;
@@ -27,7 +27,12 @@ public class GameItem {
 
     public GameItem(Mesh mesh) {
         this();
-        this.mesh = mesh;
+        this.meshes = new Mesh[]{mesh};
+    }
+
+    public GameItem(Mesh[] meshes) {
+        this();
+        this.meshes = meshes;
     }
 
     public Vector3f getPosition() {
@@ -65,10 +70,19 @@ public class GameItem {
     }
 
     public Mesh getMesh() {
-        return mesh;
+        return meshes[0];
+    }
+
+    public Mesh[] getMeshes() {
+        return meshes;
     }
 
     public void setMesh(Mesh mesh) {
-        this.mesh = mesh;
+        if (this.meshes != null) {
+            for (Mesh currMesh : meshes) {
+                currMesh.cleanUp();
+            }
+        }
+        this.meshes = new Mesh[]{mesh};
     }
 }

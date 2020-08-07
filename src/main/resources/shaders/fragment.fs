@@ -172,8 +172,8 @@ float calcShadow(vec4 position) {
     projCoords = projCoords * 0.5 + 0.5;
     float bias = 0.05;
     float shadowFactor = 0.0;
-    vec2 inc = 1.0 / textureSize(shadowMap, 0); for(int row = - 1; row <= 1; ++row) {
-
+    vec2 inc = 1.0 / textureSize(shadowMap, 0);
+    for(int row = - 1; row <= 1; ++row) {
         for(int col = - 1; col <= 1; ++col) {
             float textDepth = texture(shadowMap, projCoords.xy + vec2(row, col) * inc).r;
             shadowFactor += projCoords.z - bias > textDepth ? 1.0 : 0.0;

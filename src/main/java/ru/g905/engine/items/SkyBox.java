@@ -7,7 +7,7 @@ package ru.g905.engine.items;
 
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
-import ru.g905.engine.graph.ObjLoader;
+import ru.g905.engine.loaders.obj.ObjLoader;
 import ru.g905.engine.graph.Texture;
 
 /**

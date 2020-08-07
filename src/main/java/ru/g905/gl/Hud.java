@@ -12,7 +12,7 @@ import ru.g905.engine.IHud;
 import ru.g905.engine.Window;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
-import ru.g905.engine.graph.ObjLoader;
+import ru.g905.engine.loaders.obj.ObjLoader;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.TextItem;
 

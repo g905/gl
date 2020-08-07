@@ -7,6 +7,7 @@ package ru.g905.gl;
 
 import ru.g905.engine.GameEngine;
 import ru.g905.engine.IGameLogic;
+import ru.g905.engine.Window;
 
 /**
  *
@@ -21,7 +22,8 @@ public class Main {
         try {
             boolean vSync = true;
             IGameLogic gameLogic = new DummyGame();
-            GameEngine gameEng = new GameEngine("Game", vSync, gameLogic);
+            Window.WindowOptions opts = new Window.WindowOptions();
+            GameEngine gameEng = new GameEngine("Game", vSync, opts, gameLogic);
             gameEng.run();
         } catch (Exception exp) {
             exp.printStackTrace();

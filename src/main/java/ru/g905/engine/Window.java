@@ -36,12 +36,15 @@ public class Window {
 
     private boolean vSync;
 
-    public Window(String title, int width, int height, boolean vSync) {
+    private WindowOptions opts;
+
+    public Window(String title, int width, int height, boolean vSync, WindowOptions opts) {
         this.title = title;
         this.width = width;
         this.height = height;
         this.vSync = vSync;
         this.resized = false;
+        this.opts = opts;
     }
 
     public void init() throws Exception {
@@ -125,8 +128,10 @@ public class Window {
 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
+        if (opts.cullFace) {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+        }
         //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         setIcon("src/main/resources/images/icons/icon5.png");
     }
@@ -201,5 +206,11 @@ public class Window {
     public void update() {
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
+    }
+
+    public static class WindowOptions {
+
+        public boolean cullFace;
+        public boolean showTriangles;
     }
 }
