@@ -22,7 +22,7 @@ import ru.g905.engine.items.GameItem;
  */
 public class MD5Loader {
 
-    private static final String NORAM_FILE_SUFFIX = "_normal";
+    private static final String NORMAL_FILE_SUFFIX = "_local";
 
     public static GameItem process(MD5Model md5Model, Vector4f defaultColor) throws Exception {
         List<MD5Mesh> md5MeshList = md5Model.getMeshes();
@@ -111,7 +111,7 @@ public class MD5Loader {
             if (pos > 0) {
                 String basePath = texturePath.substring(0, pos);
                 String extension = texturePath.substring(pos, texturePath.length());
-                String normalMapFileName = basePath + NORAM_FILE_SUFFIX + extension;
+                String normalMapFileName = basePath + NORMAL_FILE_SUFFIX + extension;
                 if (Utils.existsResourceFile(normalMapFileName)) {
                     Texture normalMap = new Texture(normalMapFileName);
                     material.setNormalMap(normalMap);

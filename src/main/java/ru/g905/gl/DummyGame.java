@@ -18,6 +18,7 @@ import ru.g905.engine.graph.Camera;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.Renderer;
+import ru.g905.engine.graph.Texture;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.Terrain;
@@ -43,7 +44,7 @@ public class DummyGame implements IGameLogic {
 
     private Terrain terrain;
 
-    private GameItem cubeGameItem;
+    private GameItem monster;
 
     private float angleInc;
 
@@ -73,7 +74,9 @@ public class DummyGame implements IGameLogic {
         cubeGameItem.setPosition(0, 0, 0);
         cubeGameItem.setScale(0.5f);*/
         MD5Model md5Model = MD5Model.parse("models/monster.md5mesh");
-        GameItem monster = MD5Loader.process(md5Model, new Vector4f(1, 1, 1, 1));
+        monster = MD5Loader.process(md5Model, new Vector4f(1, 1, 1, 1));
+        Texture nm = new Texture("src/main/resources/textures/monster/hellknight_local.png");
+        monster.getMesh().getMaterial().setNormalMap(nm);
         monster.setScale(0.05f);
         monster.setRotation(90, 0, 0);
 
@@ -159,12 +162,12 @@ public class DummyGame implements IGameLogic {
             camera.setPosition(prevPos.x, prevPos.y, prevPos.z);
         }
 
-        /*        float rotY = cubeGameItem.getRotation().y;
+        float rotY = monster.getRotation().z;
         rotY += 0.5f;
         if (rotY >= 360) {
             rotY -= 360;
         }
-        cubeGameItem.getRotation().y = rotY;*/
+        monster.getRotation().z = rotY;
         lightAngle += angleInc;
         if (lightAngle < 0) {
             lightAngle = 0;
