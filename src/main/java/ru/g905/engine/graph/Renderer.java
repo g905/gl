@@ -100,6 +100,8 @@ public class Renderer {
 
         depthShaderProgram.createUniform("orthoProjectionMatrix");
         depthShaderProgram.createUniform("modelLightViewMatrix");
+
+        depthShaderProgram.createUniform("jointsMatrix");
     }
 
     private void setupSkyBoxShader() throws Exception {
@@ -186,6 +188,12 @@ public class Renderer {
             mesh.renderList(mapMeshes.get(mesh), (GameItem gameItem) -> {
                 Matrix4f modelLightViewMatrix = transformation.buildModelViewMatrix(gameItem, lightViewMatrix);
                 depthShaderProgram.setUniform("modelLightViewMatrix", modelLightViewMatrix);
+
+                if (gameItem instanceof AnimGameItem) {
+                    AnimGameItem animGameItem = (AnimGameItem) gameItem;
+                    AnimatedFrame frame = animGameItem.getCurrentFrame();
+                    depthShaderProgram.setUniform("jointsMatrix", frame.getJointMatrices());
+                }
             }
             );
         }
