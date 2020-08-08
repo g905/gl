@@ -20,6 +20,8 @@ import ru.g905.engine.Scene;
 import ru.g905.engine.SceneLight;
 import ru.g905.engine.Utils;
 import ru.g905.engine.Window;
+import ru.g905.engine.graph.anim.AnimGameItem;
+import ru.g905.engine.graph.anim.AnimatedFrame;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.graph.lights.PointLight;
 import ru.g905.engine.graph.lights.SpotLight;
@@ -139,6 +141,9 @@ public class Renderer {
         sceneShaderProgram.createUniform("shadowMap");
         sceneShaderProgram.createUniform("orthoProjectionMatrix");
         sceneShaderProgram.createUniform("modelLightViewMatrix");
+
+        // Create uniform for joint matrices
+        sceneShaderProgram.createUniform("jointsMatrix");
     }
 
     private void setupHudShader() throws Exception {
@@ -235,14 +240,22 @@ public class Renderer {
         // Render each mesh with the associated game Items
         Map<Mesh, List<GameItem>> mapMeshes = scene.getGameMeshes();
         for (Mesh mesh : mapMeshes.keySet()) {
+
             sceneShaderProgram.setUniform("material", mesh.getMaterial());
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, shadowMap.getDepthMapTexture().getId());
             mesh.renderList(mapMeshes.get(mesh), (GameItem gameItem) -> {
+
                 Matrix4f modelViewMatrix = transformation.buildModelViewMatrix(gameItem, viewMatrix);
                 sceneShaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
                 Matrix4f modelLightViewMatrix = transformation.buildModelLightViewMatrix(gameItem, lightViewMatrix);
                 sceneShaderProgram.setUniform("modelLightViewMatrix", modelLightViewMatrix);
+
+                if (gameItem instanceof AnimGameItem) {
+                    AnimGameItem animGameItem = (AnimGameItem) gameItem;
+                    AnimatedFrame frame = animGameItem.getCurrentFrame();
+                    sceneShaderProgram.setUniform("jointsMatrix", frame.getJointMatrices());
+                }
             }
             );
         }

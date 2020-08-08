@@ -21,8 +21,7 @@ public class Utils {
     public static String loadResource(String filename) throws Exception {
         System.out.println("load filename: " + filename);
         String result;
-        try (InputStream in = Utils.class.getResourceAsStream(filename);
-                Scanner scanner = new Scanner(in, java.nio.charset.StandardCharsets.UTF_8.name())) {
+        try ( InputStream in = Utils.class.getResourceAsStream(filename);  Scanner scanner = new Scanner(in, java.nio.charset.StandardCharsets.UTF_8.name())) {
             result = scanner.useDelimiter("\\A").next();
         }
         return result;
@@ -59,9 +58,18 @@ public class Utils {
         return floatArr;
     }
 
+    public static int[] listIntToArray(List<Integer> list) {
+        int size = list != null ? list.size() : 0;
+        int[] floatArr = new int[size];
+        for (int i = 0; i < size; i++) {
+            floatArr[i] = list.get(i);
+        }
+        return floatArr;
+    }
+
     public static boolean existsResourceFile(String fileName) {
         boolean result;
-        try (InputStream is = Utils.class.getResourceAsStream(fileName)) {
+        try ( InputStream is = Utils.class.getResourceAsStream(fileName)) {
             result = is != null;
         } catch (Exception excp) {
             result = false;

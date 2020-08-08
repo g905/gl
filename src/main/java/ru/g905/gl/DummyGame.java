@@ -19,9 +19,11 @@ import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.Renderer;
 import ru.g905.engine.graph.Texture;
+import ru.g905.engine.graph.anim.AnimGameItem;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.Terrain;
+import ru.g905.engine.loaders.md5.MD5AnimModel;
 import ru.g905.engine.loaders.md5.MD5Loader;
 import ru.g905.engine.loaders.md5.MD5Model;
 import ru.g905.engine.loaders.obj.ObjLoader;
@@ -44,11 +46,11 @@ public class DummyGame implements IGameLogic {
 
     private Terrain terrain;
 
-    private GameItem monster;
-
     private float angleInc;
 
     private float lightAngle;
+
+    private AnimGameItem monster;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -64,30 +66,28 @@ public class DummyGame implements IGameLogic {
 
         scene = new Scene();
 
-        // Setup  GameItems
         float reflectance = 1f;
-        /*float reflectance = 1f;
-        Mesh cubeMesh = ObjLoader.loadMesh("models/cube.obj");
-        Material cubeMaterial = new Material(new Vector4f(0, 1, 0, 1), reflectance);
-        cubeMesh.setMaterial(cubeMaterial);
-        cubeGameItem = new GameItem(cubeMesh);
-        cubeGameItem.setPosition(0, 0, 0);
-        cubeGameItem.setScale(0.5f);*/
-        MD5Model md5Model = MD5Model.parse("models/monster.md5mesh");
-        monster = MD5Loader.process(md5Model, new Vector4f(1, 1, 1, 1));
-        Texture nm = new Texture("src/main/resources/textures/monster/hellknight_local.png");
-        monster.getMesh().getMaterial().setNormalMap(nm);
-        monster.setScale(0.05f);
-        monster.setRotation(90, 0, 0);
 
         Mesh quadMesh = ObjLoader.loadMesh("models/plane.obj");
-        Material quadMaterial = new Material(new Vector4f(0.0f, 0.0f, 1.0f, 10.0f), reflectance);
+        Material quadMaterial = new Material(new Vector4f(0.0f, 0.0f, 1.0f, 1.f), reflectance);
         quadMesh.setMaterial(quadMaterial);
         GameItem quadGameItem = new GameItem(quadMesh);
-        quadGameItem.setPosition(0, -1, 0);
-        quadGameItem.setScale(3.5f);
+        quadGameItem.setPosition(0, 0, 0);
+        quadGameItem.setScale(2.5f);
 
-        scene.setGameItems(new GameItem[]{monster, quadGameItem});
+        // Setup  GameItems
+        MD5Model md5Meshodel = MD5Model.parse("models/monster.md5mesh");
+        MD5AnimModel md5AnimModel = MD5AnimModel.parse("models/monster.md5anim");
+        //MD5Model md5Meshodel = MD5Model.parse("models/boblamp.md5mesh");
+        //MD5AnimModel md5AnimModel = MD5AnimModel.parse("models/boblamp.md5anim");
+
+        monster = MD5Loader.process(md5Meshodel, md5AnimModel, new Vector4f(1, 1, 1, 1));
+        monster.setScale(0.05f);
+        monster.setRotation(90, 0, 0);
+        monster.getMesh().getMaterial().setReflectance(1.0f);
+        monster.getMesh().getMaterial().setNormalMap(new Texture("src/main/resources/textures/monster/hellknight_local.png"));
+
+        scene.setGameItems(new GameItem[]{quadGameItem, monster});
 
         // Setup Lights
         setupLights();
@@ -97,7 +97,6 @@ public class DummyGame implements IGameLogic {
         camera.getPosition().z = 6.5f;
         camera.getRotation().x = 25;
         camera.getRotation().y = -1;
-        hud = new Hud("LightAngle:");
     }
 
     private void setupLights() {
@@ -142,6 +141,9 @@ public class DummyGame implements IGameLogic {
         } else {
             angleInc = 0;
         }
+        if (window.isKeyPressed(GLFW_KEY_SPACE)) {
+            monster.nextFrame();
+        }
     }
 
     @Override
@@ -149,12 +151,12 @@ public class DummyGame implements IGameLogic {
         // Update camera based on mouse
         if (mouseInput.isRightButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
-            camera.moveRotation(rotVec.x * DummyGame.MOUSE_SENSITIVITY, rotVec.y * DummyGame.MOUSE_SENSITIVITY, 0);
+            camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
 
         // Update camera position
         Vector3f prevPos = new Vector3f(camera.getPosition());
-        camera.movePosition(cameraInc.x * DummyGame.CAMERA_POS_STEP, cameraInc.y * DummyGame.CAMERA_POS_STEP, cameraInc.z * DummyGame.CAMERA_POS_STEP);
+        camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
         // Check if there has been a collision. If true, set the y position to
         // the maximum height
         float height = terrain != null ? terrain.getHeight(camera.getPosition()) : -Float.MAX_VALUE;
@@ -162,12 +164,6 @@ public class DummyGame implements IGameLogic {
             camera.setPosition(prevPos.x, prevPos.y, prevPos.z);
         }
 
-        float rotY = monster.getRotation().z;
-        rotY += 0.5f;
-        if (rotY >= 360) {
-            rotY -= 360;
-        }
-        monster.getRotation().z = rotY;
         lightAngle += angleInc;
         if (lightAngle < 0) {
             lightAngle = 0;
@@ -181,8 +177,6 @@ public class DummyGame implements IGameLogic {
         lightDirection.y = yValue;
         lightDirection.z = zValue;
         lightDirection.normalize();
-        float lightAngle = (float) Math.toDegrees(Math.acos(lightDirection.z));
-        hud.setStatusText("LightAngle: " + lightAngle);
     }
 
     @Override
