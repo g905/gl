@@ -23,6 +23,9 @@ public class Main {
             boolean vSync = true;
             IGameLogic gameLogic = new DummyGame();
             Window.WindowOptions opts = new Window.WindowOptions();
+            opts.cullFace = false;
+            opts.showFps = true;
+            opts.showTriangles = false;
             GameEngine gameEng = new GameEngine("Game", vSync, opts, gameLogic);
             gameEng.run();
         } catch (Exception exp) {

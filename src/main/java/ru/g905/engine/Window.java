@@ -24,7 +24,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  */
 public class Window {
 
-    private final String title;
+    private String title;
 
     private int width;
 
@@ -124,22 +124,24 @@ public class Window {
 
         glEnable(GL_DEPTH_TEST);
 
+        if (opts.showTriangles) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
         glEnable(GL_BLEND);
-
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         if (opts.cullFace) {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
         }
-        //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        setIcon("src/main/resources/images/icons/icon5.png");
+
+        //setIcon("src/main/resources/images/icons/icon5.png");
     }
 
     public void setIcon(String path) throws Exception {
         ByteBuffer buff;
 
-        try (MemoryStack stack = MemoryStack.stackPush()) {
+        try ( MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -175,8 +177,12 @@ public class Window {
         return glfwWindowShouldClose(windowHandle);
     }
 
-    public String getTitle() {
+    public String getWindowTitle() {
         return title;
+    }
+
+    public void setWindowTitle(String title) {
+        glfwSetWindowTitle(windowHandle, title);
     }
 
     public int getWidth() {
@@ -208,9 +214,22 @@ public class Window {
         glfwPollEvents();
     }
 
+    public WindowOptions getWindowOptions() {
+        return opts;
+    }
+
+    public void setOpts(WindowOptions opts) {
+        this.opts = opts;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
     public static class WindowOptions {
 
         public boolean cullFace;
         public boolean showTriangles;
+        public boolean showFps;
     }
 }
