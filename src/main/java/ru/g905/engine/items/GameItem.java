@@ -78,11 +78,14 @@ public class GameItem {
     }
 
     public void setMesh(Mesh mesh) {
-        if (this.meshes != null) {
-            for (Mesh currMesh : meshes) {
-                currMesh.cleanUp();
-            }
-        }
         this.meshes = new Mesh[]{mesh};
     }
+
+    public void cleanup() {
+        int numMeshes = this.meshes != null ? this.meshes.length : 0;
+        for (int i = 0; i < numMeshes; i++) {
+            this.meshes[i].cleanUp();
+        }
+    }
+
 }

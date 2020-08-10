@@ -10,6 +10,7 @@ import java.util.Map;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE2;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -25,6 +26,7 @@ import ru.g905.engine.graph.anim.AnimatedFrame;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.graph.lights.PointLight;
 import ru.g905.engine.graph.lights.SpotLight;
+import ru.g905.engine.graph.particles.IParticleEmitter;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.SkyBox;
 
@@ -55,6 +57,8 @@ public class Renderer {
 
     private ShaderProgram skyBoxShaderProgram;
 
+    private ShaderProgram particlesShaderProgram;
+
     private final float specularPower;
 
     public Renderer() {
@@ -68,6 +72,7 @@ public class Renderer {
         setupDepthShader();
         setupSkyBoxShader();
         setupSceneShader();
+        setupParticlesShader();
         setupHudShader();
     }
 
@@ -86,6 +91,8 @@ public class Renderer {
         renderScene(window, camera, scene);
 
         renderSkyBox(window, camera, scene);
+
+        renderParticles(window, camera, scene);
 
         renderHud(window, hud);
 
@@ -160,8 +167,15 @@ public class Renderer {
         hudShaderProgram.createUniform("hasTexture");
     }
 
-    public void clear() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    private void setupParticlesShader() throws Exception {
+        particlesShaderProgram = new ShaderProgram();
+        particlesShaderProgram.createVertexShader(Utils.loadResource("/shaders/particles_vertex.vs"));
+        particlesShaderProgram.createFragmentShader(Utils.loadResource("/shaders/particles_fragment.fs"));
+        particlesShaderProgram.link();
+
+        particlesShaderProgram.createUniform("projectionMatrix");
+        particlesShaderProgram.createUniform("modelViewMatrix");
+        particlesShaderProgram.createUniform("texture_sampler");
     }
 
     private void renderDepthMap(Window window, Camera camera, Scene scene) {
@@ -340,6 +354,39 @@ public class Renderer {
         }
     }
 
+    private void renderParticles(Window window, Camera camera, Scene scene) {
+        particlesShaderProgram.bind();
+
+        particlesShaderProgram.setUniform("texture_sampler", 0);
+        Matrix4f projectionMatrix = transformation.getProjectionMatrix();
+        particlesShaderProgram.setUniform("projectionMatrix", projectionMatrix);
+
+        Matrix4f viewMatrix = transformation.getViewMatrix();
+        IParticleEmitter[] emitters = scene.getParticleEmitters();
+        int numEmitters = emitters != null ? emitters.length : 0;
+
+        GL11.glDepthMask(false);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+        for (int i = 0; i < numEmitters; i++) {
+            IParticleEmitter emitter = emitters[i];
+            Mesh mesh = emitter.getBaseParticle().getMesh();
+
+            mesh.renderList((emitter.getParticles()), (GameItem gameItem) -> {
+                Matrix4f modelMatrix = transformation.buildModelMatrix(gameItem);
+                viewMatrix.transpose3x3(modelMatrix);
+                Matrix4f modelViewMatrix = transformation.buildModelViewMatrix(modelMatrix, viewMatrix);
+                modelViewMatrix.scale(gameItem.getScale());
+                particlesShaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
+            });
+        }
+
+        GL11.glDepthMask(true);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        particlesShaderProgram.unbind();
+    }
+
     /**
      * Renders the three axis in space (For debugging purposes only
      *
@@ -372,6 +419,10 @@ public class Renderer {
         glEnd();
 
         glPopMatrix();
+    }
+
+    public void clear() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     public void cleanup() {

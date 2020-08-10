@@ -21,6 +21,8 @@ import ru.g905.engine.graph.Renderer;
 import ru.g905.engine.graph.Texture;
 import ru.g905.engine.graph.anim.AnimGameItem;
 import ru.g905.engine.graph.lights.DirectionalLight;
+import ru.g905.engine.graph.particles.FlowParticleEmitter;
+import ru.g905.engine.graph.particles.Particle;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.Terrain;
 import ru.g905.engine.loaders.md5.MD5AnimModel;
@@ -51,6 +53,8 @@ public class DummyGame implements IGameLogic {
     private float lightAngle;
 
     private AnimGameItem monster;
+
+    private FlowParticleEmitter particleEmitter;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -91,6 +95,28 @@ public class DummyGame implements IGameLogic {
 
         // Setup Lights
         setupLights();
+
+        //Setup particles
+        Vector3f particleSpeed = new Vector3f(0, 1, 0);
+        particleSpeed.mul(2.5f);
+        long ttl = 4000;
+        int maxParticles = 200;
+        long creationPeriodMillis = 300;
+        float range = 0.2f;
+        float scale = 0.5f;
+        Mesh partMesh = ObjLoader.loadMesh("models/particle.obj");
+        Texture texture = new Texture("src/main/resources/textures/particle.png");
+
+        Material partMaterial = new Material(texture, reflectance);
+        partMesh.setMaterial(partMaterial);
+
+        Particle particle = new Particle(partMesh, particleSpeed, ttl);
+        particle.setScale(scale);
+        particleEmitter = new FlowParticleEmitter(particle, maxParticles, creationPeriodMillis);
+        particleEmitter.setActive(true);
+        particleEmitter.setPositionRndRange(range);
+        particleEmitter.setSpeedRndRange(range);
+        this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
 
         camera.getPosition().x = 0.25f;
         camera.getPosition().y = 6.5f;
@@ -177,6 +203,8 @@ public class DummyGame implements IGameLogic {
         lightDirection.y = yValue;
         lightDirection.z = zValue;
         lightDirection.normalize();
+
+        particleEmitter.update((long) (interval * 1000));
     }
 
     @Override
