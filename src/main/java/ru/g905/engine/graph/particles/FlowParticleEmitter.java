@@ -51,17 +51,49 @@ public class FlowParticleEmitter implements IParticleEmitter {
         return baseParticle;
     }
 
-    @Override
-    public List<GameItem> getParticles() {
-        return particles;
+    public long getCreationPeriodMillis() {
+        return creationPeriodMillis;
     }
 
     public int getMaxParticles() {
         return maxParticles;
     }
 
+    @Override
+    public List<GameItem> getParticles() {
+        return particles;
+    }
+
+    public float getPositionRndRange() {
+        return positionRndRange;
+    }
+
+    public float getScaleRndRange() {
+        return scaleRndRange;
+    }
+
+    public float getSpeedRndRange() {
+        return speedRndRange;
+    }
+
+    public void setAnimRange(long animRange) {
+        this.animRange = animRange;
+    }
+
+    public void setCreationPeriodMillis(long creationPeriodMillis) {
+        this.creationPeriodMillis = creationPeriodMillis;
+    }
+
     public void setMaxParticles(int maxParticles) {
         this.maxParticles = maxParticles;
+    }
+
+    public void setPositionRndRange(float positionRndRange) {
+        this.positionRndRange = positionRndRange;
+    }
+
+    public void setScaleRndRange(float scaleRndRange) {
+        this.scaleRndRange = scaleRndRange;
     }
 
     public boolean isActive() {
@@ -72,52 +104,8 @@ public class FlowParticleEmitter implements IParticleEmitter {
         this.active = active;
     }
 
-    public long getCreationPeriodMillis() {
-        return creationPeriodMillis;
-    }
-
-    public void setCreationPeriodMillis(long creationPeriodMillis) {
-        this.creationPeriodMillis = creationPeriodMillis;
-    }
-
-    public long getLastCreationTime() {
-        return lastCreationTime;
-    }
-
-    public void setLastCreationTime(long lastCreationTime) {
-        this.lastCreationTime = lastCreationTime;
-    }
-
-    public float getSpeedRndRange() {
-        return speedRndRange;
-    }
-
     public void setSpeedRndRange(float speedRndRange) {
         this.speedRndRange = speedRndRange;
-    }
-
-    public float getPositionRndRange() {
-        return positionRndRange;
-    }
-
-    public void setPositionRndRange(float positionRndRange) {
-        this.positionRndRange = positionRndRange;
-    }
-
-    public float getScaleRndRange() {
-        return scaleRndRange;
-    }
-
-    public void setScaleRndRange(float scaleRndRange) {
-        this.scaleRndRange = scaleRndRange;
-    }
-
-    public long getAnimRange() {
-        return animRange;
-    }
-
-    public void setAnimRange(long animRange) {
-        this.animRange = animRange;
     }
 
     public void update(long elapsedTime) {
@@ -125,7 +113,6 @@ public class FlowParticleEmitter implements IParticleEmitter {
         if (lastCreationTime == 0) {
             lastCreationTime = now;
         }
-
         Iterator<? extends GameItem> it = particles.iterator();
         while (it.hasNext()) {
             Particle particle = (Particle) it.next();
@@ -137,8 +124,7 @@ public class FlowParticleEmitter implements IParticleEmitter {
         }
 
         int length = this.getParticles().size();
-
-        if (now - lastCreationTime >= creationPeriodMillis && length < maxParticles) {
+        if (now - lastCreationTime >= this.creationPeriodMillis && length < maxParticles) {
             createParticle();
             this.lastCreationTime = now;
         }
@@ -146,6 +132,7 @@ public class FlowParticleEmitter implements IParticleEmitter {
 
     private void createParticle() {
         Particle particle = new Particle(this.getBaseParticle());
+        // Add a little bit of randomness of the parrticle
         float sign = Math.random() > 0.5d ? -1.0f : 1.0f;
         float speedInc = sign * (float) Math.random() * this.speedRndRange;
         float posInc = sign * (float) Math.random() * this.positionRndRange;
@@ -154,10 +141,16 @@ public class FlowParticleEmitter implements IParticleEmitter {
         particle.getPosition().add(posInc, posInc, posInc);
         particle.getSpeed().add(speedInc, speedInc, speedInc);
         particle.setScale(particle.getScale() + scaleInc);
-        particle.setUpdateTextureMillis(particle.getUpdateTextureMillis() + updateAnimInc);
+        particle.setUpdateTextureMills(particle.getUpdateTextureMillis() + updateAnimInc);
         particles.add(particle);
     }
 
+    /**
+     * Updates a particle position
+     *
+     * @param particle The particle to update
+     * @param elapsedTime Elapsed time in milliseconds
+     */
     public void updatePosition(Particle particle, long elapsedTime) {
         Vector3f speed = particle.getSpeed();
         float delta = elapsedTime / 1000.0f;
@@ -174,5 +167,4 @@ public class FlowParticleEmitter implements IParticleEmitter {
             particle.cleanup();
         }
     }
-
 }

@@ -40,7 +40,7 @@ public class Mesh {
 
     public static final int MAX_WEIGHTS = 4;
 
-    private final int vaoId;
+    protected final int vaoId;
 
     protected final List<Integer> vboIdList;
 
@@ -169,7 +169,7 @@ public class Mesh {
         return vertexCount;
     }
 
-    private void initRender() {
+    protected void initRender() {
         Texture texture = material.getTexture();
         if (texture != null) {
             // Activate first texture bank
@@ -189,7 +189,7 @@ public class Mesh {
         glBindVertexArray(getVaoId());
     }
 
-    private void endRender() {
+    protected void endRender() {
         // Restore state
         glBindVertexArray(0);
 
@@ -249,13 +249,13 @@ public class Mesh {
         glDeleteVertexArrays(vaoId);
     }
 
-    private static float[] createEmptyFloatArray(int length, float defaultValue) {
+    protected static float[] createEmptyFloatArray(int length, float defaultValue) {
         float[] result = new float[length];
         Arrays.fill(result, defaultValue);
         return result;
     }
 
-    private static int[] createEmptyIntArray(int length, int defaultValue) {
+    protected static int[] createEmptyIntArray(int length, int defaultValue) {
         int[] result = new int[length];
         Arrays.fill(result, defaultValue);
         return result;

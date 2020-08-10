@@ -89,14 +89,14 @@ public class ShaderProgram {
 
     public void setUniform(String uniformName, Matrix4f value) {
         // Dump the matrix into a float buffer
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             glUniformMatrix4fv(uniforms.get(uniformName), false,
                     value.get(stack.mallocFloat(16)));
         }
     }
 
     public void setUniform(String uniformName, Matrix4f[] matrices) {
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             int length = matrices != null ? matrices.length : 0;
             FloatBuffer fb = stack.mallocFloat(16 * length);
             for (int i = 0; i < length; i++) {
@@ -161,7 +161,7 @@ public class ShaderProgram {
     }
 
     public void setUniform(String uniformName, Material material) {
-        setUniform(uniformName + ".ambient", material.getAmbientСolor());
+        setUniform(uniformName + ".ambient", material.getAmbientColor());
         setUniform(uniformName + ".diffuse", material.getDiffuseColor());
         setUniform(uniformName + ".specular", material.getSpecularColor());
         setUniform(uniformName + ".hasTexture", material.isTextured() ? 1 : 0);

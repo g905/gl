@@ -5,6 +5,7 @@
  */
 package ru.g905.engine.items;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import ru.g905.engine.graph.Mesh;
 
@@ -20,14 +21,14 @@ public class GameItem {
 
     private float scale;
 
-    private final Vector3f rotation;
+    private final Quaternionf rotation;
 
     private int textPos;
 
     public GameItem() {
         position = new Vector3f();
         scale = 1;
-        rotation = new Vector3f();
+        rotation = new Quaternionf();
         textPos = 0;
     }
 
@@ -45,7 +46,11 @@ public class GameItem {
         return position;
     }
 
-    public void setPosition(float x, float y, float z) {
+    public int getTextPos() {
+        return textPos;
+    }
+
+    public final void setPosition(float x, float y, float z) {
         this.position.x = x;
         this.position.y = y;
         this.position.z = z;
@@ -55,24 +60,16 @@ public class GameItem {
         return scale;
     }
 
-    public void setScale(float scale) {
+    public final void setScale(float scale) {
         this.scale = scale;
     }
 
-    public Vector3f getRotation() {
+    public Quaternionf getRotation() {
         return rotation;
     }
 
-    public void setRotation(float x, float y, float z) {
-        this.rotation.x = x;
-        this.rotation.y = y;
-        this.rotation.z = z;
-    }
-
-    public void setRotation(Vector3f v) {
-        this.rotation.x = v.x;
-        this.rotation.y = v.y;
-        this.rotation.z = v.z;
+    public final void setRotation(Quaternionf q) {
+        this.rotation.set(q);
     }
 
     public Mesh getMesh() {
@@ -81,6 +78,10 @@ public class GameItem {
 
     public Mesh[] getMeshes() {
         return meshes;
+    }
+
+    public void setMeshes(Mesh[] meshes) {
+        this.meshes = meshes;
     }
 
     public void setMesh(Mesh mesh) {
@@ -94,12 +95,7 @@ public class GameItem {
         }
     }
 
-    public int getTextPos() {
-        return textPos;
-    }
-
     public void setTextPos(int textPos) {
         this.textPos = textPos;
     }
-
 }

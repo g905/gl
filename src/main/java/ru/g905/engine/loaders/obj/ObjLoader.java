@@ -10,6 +10,7 @@ import java.util.List;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import ru.g905.engine.Utils;
+import ru.g905.engine.graph.InstancedMesh;
 import ru.g905.engine.graph.Mesh;
 
 /**
@@ -18,7 +19,11 @@ import ru.g905.engine.graph.Mesh;
  */
 public class ObjLoader {
 
-    public static Mesh loadMesh(String filename) throws Exception {
+    public static Mesh loadMesh(String fileName) throws Exception {
+        return loadMesh(fileName, 1);
+    }
+
+    public static Mesh loadMesh(String filename, int instances) throws Exception {
         List<String> lines = Utils.readAllLines(filename);
 
         //System.out.println(lines);
@@ -58,10 +63,10 @@ public class ObjLoader {
                     break;
             }
         }
-        return reorderLists(vertices, textures, normals, faces);
+        return reorderLists(vertices, textures, normals, faces, instances);
     }
 
-    private static Mesh reorderLists(List<Vector3f> posList, List<Vector2f> texCoordList, List<Vector3f> normList, List<Face> facesList) {
+    private static Mesh reorderLists(List<Vector3f> posList, List<Vector2f> texCoordList, List<Vector3f> normList, List<Face> facesList, int instances) {
         List<Integer> indices = new ArrayList<>();
 
         float[] posArr = new float[posList.size() * 3];
@@ -81,9 +86,14 @@ public class ObjLoader {
                 processFaceVertex(indValue, texCoordList, normList, indices, texCoordArr, normArr);
             }
         }
-        int[] indicesArr = new int[indices.size()];
-        indicesArr = indices.stream().mapToInt((Integer v) -> v).toArray();
-        Mesh mesh = new Mesh(posArr, texCoordArr, normArr, indicesArr);
+        int[] indicesArr = Utils.listIntToArray(indices);
+        //indicesArr = indices.stream().mapToInt((Integer v) -> v).toArray();
+        Mesh mesh;
+        if (instances > 1) {
+            mesh = new InstancedMesh(posArr, texCoordArr, normArr, indicesArr, instances);
+        } else {
+            mesh = new Mesh(posArr, texCoordArr, normArr, indicesArr);
+        }
         return mesh;
     }
 

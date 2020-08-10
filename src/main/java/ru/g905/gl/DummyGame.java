@@ -5,6 +5,7 @@
  */
 package ru.g905.gl;
 
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -44,7 +45,7 @@ public class DummyGame implements IGameLogic {
 
     private Hud hud;
 
-    private static final float CAMERA_POS_STEP = 0.05f;
+    private static final float CAMERA_POS_STEP = 0.10f;
 
     private Terrain terrain;
 
@@ -52,9 +53,9 @@ public class DummyGame implements IGameLogic {
 
     private float lightAngle;
 
-    private AnimGameItem monster;
-
     private FlowParticleEmitter particleEmitter;
+
+    private AnimGameItem monster;
 
     public DummyGame() {
         renderer = new Renderer();
@@ -72,14 +73,36 @@ public class DummyGame implements IGameLogic {
 
         float reflectance = 1f;
 
+        // Setup  GameItems
+        int maxParticles = 200;
         Mesh quadMesh = ObjLoader.loadMesh("models/plane.obj");
-        Material quadMaterial = new Material(new Vector4f(0.0f, 0.0f, 1.0f, 1.f), reflectance);
+        Material quadMaterial = new Material(new Vector4f(0.0f, 0.0f, 1.0f, 1.0f), reflectance);
         quadMesh.setMaterial(quadMaterial);
         GameItem quadGameItem = new GameItem(quadMesh);
         quadGameItem.setPosition(0, 0, 0);
         quadGameItem.setScale(2.5f);
 
-        // Setup  GameItems
+        scene.setGameItems(new GameItem[]{quadGameItem});
+
+        Vector3f particleSpeed = new Vector3f(0, 1, 0);
+        particleSpeed.mul(2.5f);
+        long ttl = 4000;
+        long creationPeriodMillis = 300;
+        float range = 0.2f;
+        float scale = 1.0f;
+        Mesh partMesh = ObjLoader.loadMesh("models/particle.obj", maxParticles);
+        Texture texture = new Texture("src/main/resources/textures/particle_anim.png", 4, 4);
+        Material partMaterial = new Material(texture, reflectance);
+        partMesh.setMaterial(partMaterial);
+        Particle particle = new Particle(partMesh, particleSpeed, ttl, 100);
+        particle.setScale(scale);
+        particleEmitter = new FlowParticleEmitter(particle, maxParticles, creationPeriodMillis);
+        particleEmitter.setActive(true);
+        particleEmitter.setPositionRndRange(range);
+        particleEmitter.setSpeedRndRange(range);
+        particleEmitter.setAnimRange(10);
+        this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
+
         MD5Model md5Meshodel = MD5Model.parse("models/monster.md5mesh");
         MD5AnimModel md5AnimModel = MD5AnimModel.parse("models/monster.md5anim");
         //MD5Model md5Meshodel = MD5Model.parse("models/boblamp.md5mesh");
@@ -87,42 +110,26 @@ public class DummyGame implements IGameLogic {
 
         monster = MD5Loader.process(md5Meshodel, md5AnimModel, new Vector4f(1, 1, 1, 1));
         monster.setScale(0.05f);
-        monster.setRotation(90, 0, 0);
+        Quaternionf n = new Quaternionf(-0.7, 0, 0, 0.7);
+        monster.setRotation(n);
         monster.getMesh().getMaterial().setReflectance(1.0f);
         monster.getMesh().getMaterial().setNormalMap(new Texture("src/main/resources/textures/monster/hellknight_local.png"));
 
-        scene.setGameItems(new GameItem[]{quadGameItem, monster});
+        scene.setGameItems(new GameItem[]{monster});
+
+        // Shadows
+        scene.setRenderShadows(false);
 
         // Setup Lights
         setupLights();
-
-        //Setup particles
-        Vector3f particleSpeed = new Vector3f(0, 1, 0);
-        particleSpeed.mul(2.5f);
-        long ttl = 4000;
-        int maxParticles = 200;
-        long creationPeriodMillis = 300;
-        float range = 0.2f;
-        float scale = 1.0f;
-        Mesh partMesh = ObjLoader.loadMesh("models/particle.obj");
-        Texture texture = new Texture("src/main/resources/textures/particle_anim.png", 4, 4);
-
-        Material partMaterial = new Material(texture, reflectance);
-        partMesh.setMaterial(partMaterial);
-
-        Particle particle = new Particle(partMesh, particleSpeed, ttl, 100);
-        particle.setScale(scale);
-        particleEmitter = new FlowParticleEmitter(particle, maxParticles, creationPeriodMillis);
-        particleEmitter.setActive(true);
-        particleEmitter.setPositionRndRange(range);
-        particleEmitter.setSpeedRndRange(range);
-        this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
 
         camera.getPosition().x = 0.25f;
         camera.getPosition().y = 6.5f;
         camera.getPosition().z = 6.5f;
         camera.getRotation().x = 25;
         camera.getRotation().y = -1;
+
+        hud = new Hud("DEMO");
     }
 
     private void setupLights() {
@@ -137,7 +144,7 @@ public class DummyGame implements IGameLogic {
         float lightIntensity = 1.0f;
         Vector3f lightDirection = new Vector3f(0, 1, 1);
         DirectionalLight directionalLight = new DirectionalLight(new Vector3f(1, 1, 1), lightDirection, lightIntensity);
-        directionalLight.setShadowPosMult(5);
+        directionalLight.setShadowPosMult(10);
         directionalLight.setOrthoCoords(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 20.0f);
         sceneLight.setDirLight(directionalLight);
     }
@@ -166,9 +173,6 @@ public class DummyGame implements IGameLogic {
             angleInc += 0.05f;
         } else {
             angleInc = 0;
-        }
-        if (window.isKeyPressed(GLFW_KEY_SPACE)) {
-            monster.nextFrame();
         }
     }
 

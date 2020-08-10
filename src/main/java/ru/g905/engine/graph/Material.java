@@ -15,7 +15,7 @@ public class Material {
 
     private static final Vector4f DEFAULT_COLOR = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-    private Vector4f ambientСolor;
+    private Vector4f ambientColor;
 
     private Vector4f diffuseСolor;
 
@@ -28,7 +28,7 @@ public class Material {
     private Texture normalMap;
 
     public Material() {
-        this.ambientСolor = DEFAULT_COLOR;
+        this.ambientColor = DEFAULT_COLOR;
         this.diffuseСolor = DEFAULT_COLOR;
         this.specularСolor = DEFAULT_COLOR;
         this.texture = null;
@@ -48,19 +48,19 @@ public class Material {
     }
 
     public Material(Vector4f ambientСolor, Vector4f diffuseСolor, Vector4f specularСolor, Texture texture, float reflectance) {
-        this.ambientСolor = ambientСolor;
+        this.ambientColor = ambientСolor;
         this.diffuseСolor = diffuseСolor;
         this.specularСolor = specularСolor;
         this.texture = texture;
         this.reflectance = reflectance;
     }
 
-    public Vector4f getAmbientСolor() {
-        return ambientСolor;
+    public Vector4f getAmbientColor() {
+        return ambientColor;
     }
 
     public void setAmbientColor(Vector4f ambientСolor) {
-        this.ambientСolor = ambientСolor;
+        this.ambientColor = ambientСolor;
     }
 
     public Vector4f getDiffuseColor() {
