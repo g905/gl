@@ -15,14 +15,20 @@ import ru.g905.engine.graph.Mesh;
 public class GameItem {
 
     private Mesh[] meshes;
+
     private final Vector3f position;
+
     private float scale;
+
     private final Vector3f rotation;
+
+    private int textPos;
 
     public GameItem() {
         position = new Vector3f();
         scale = 1;
         rotation = new Vector3f();
+        textPos = 0;
     }
 
     public GameItem(Mesh mesh) {
@@ -86,6 +92,14 @@ public class GameItem {
         for (int i = 0; i < numMeshes; i++) {
             this.meshes[i].cleanUp();
         }
+    }
+
+    public int getTextPos() {
+        return textPos;
+    }
+
+    public void setTextPos(int textPos) {
+        this.textPos = textPos;
     }
 
 }

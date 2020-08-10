@@ -176,6 +176,11 @@ public class Renderer {
         particlesShaderProgram.createUniform("projectionMatrix");
         particlesShaderProgram.createUniform("modelViewMatrix");
         particlesShaderProgram.createUniform("texture_sampler");
+
+        particlesShaderProgram.createUniform("texXOffset");
+        particlesShaderProgram.createUniform("texYOffset");
+        particlesShaderProgram.createUniform("numCols");
+        particlesShaderProgram.createUniform("numRows");
     }
 
     private void renderDepthMap(Window window, Camera camera, Scene scene) {
@@ -372,9 +377,22 @@ public class Renderer {
             IParticleEmitter emitter = emitters[i];
             Mesh mesh = emitter.getBaseParticle().getMesh();
 
+            Texture text = mesh.getMaterial().getTexture();
+            particlesShaderProgram.setUniform("numCols", text.getNumCols());
+            particlesShaderProgram.setUniform("numRows", text.getNumRows());
+
             mesh.renderList((emitter.getParticles()), (GameItem gameItem) -> {
+                int col = gameItem.getTextPos() % text.getNumCols();
+                int row = gameItem.getTextPos() / text.getNumCols();
+                float textXOffset = (float) col / text.getNumCols();
+                float textYOffset = (float) row / text.getNumRows();
+                particlesShaderProgram.setUniform("texXOffset", textXOffset);
+                particlesShaderProgram.setUniform("texYOffset", textYOffset);
+
                 Matrix4f modelMatrix = transformation.buildModelMatrix(gameItem);
+
                 viewMatrix.transpose3x3(modelMatrix);
+                viewMatrix.scale(gameItem.getScale());
                 Matrix4f modelViewMatrix = transformation.buildModelViewMatrix(modelMatrix, viewMatrix);
                 modelViewMatrix.scale(gameItem.getScale());
                 particlesShaderProgram.setUniform("modelViewMatrix", modelViewMatrix);

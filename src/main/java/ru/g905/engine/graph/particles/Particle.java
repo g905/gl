@@ -7,6 +7,7 @@ package ru.g905.engine.graph.particles;
 
 import org.joml.Vector3f;
 import ru.g905.engine.graph.Mesh;
+import ru.g905.engine.graph.Texture;
 import ru.g905.engine.items.GameItem;
 
 /**
@@ -16,12 +17,23 @@ import ru.g905.engine.items.GameItem;
 public class Particle extends GameItem {
 
     private Vector3f speed;
+
     private long ttl;
 
-    public Particle(Mesh mesh, Vector3f speed, long ttl) {
+    private long updateTextureMillis;
+
+    private long currentAnimTimeMillis;
+
+    private int animFrames;
+
+    public Particle(Mesh mesh, Vector3f speed, long ttl, long updateTextureMillis) {
         super(mesh);
         this.speed = speed;
         this.ttl = ttl;
+        this.updateTextureMillis = updateTextureMillis;
+        this.currentAnimTimeMillis = 0;
+        Texture texture = this.getMesh().getMaterial().getTexture();
+        this.animFrames = texture.getNumCols() * texture.getNumRows();
     }
 
     public Particle(Particle baseParticle) {
@@ -33,6 +45,9 @@ public class Particle extends GameItem {
         setScale(baseParticle.getScale());
         this.speed = new Vector3f(baseParticle.speed);
         this.ttl = baseParticle.ttl;
+        this.updateTextureMillis = baseParticle.getUpdateTextureMillis();
+        this.currentAnimTimeMillis = 0;
+        this.animFrames = baseParticle.getAnimFrames();
     }
 
     public Vector3f getSpeed() {
@@ -51,8 +66,44 @@ public class Particle extends GameItem {
         this.ttl = ttl;
     }
 
+    public int getAnimFrames() {
+        return animFrames;
+    }
+
+    public void setAnimFrames(int animFrames) {
+        this.animFrames = animFrames;
+    }
+
     public long updateTtl(long elapsedTime) {
         this.ttl -= elapsedTime;
+        this.currentAnimTimeMillis += elapsedTime;
+        if (this.currentAnimTimeMillis >= getUpdateTextureMillis() && this.animFrames > 0) {
+            this.currentAnimTimeMillis = 0;
+            int pos = this.getTextPos();
+            pos++;
+            if (pos < this.animFrames) {
+                this.setTextPos(pos);
+            } else {
+                this.setTextPos(0);
+            }
+        }
         return this.ttl;
     }
+
+    public long getUpdateTextureMillis() {
+        return updateTextureMillis;
+    }
+
+    public void setUpdateTextureMillis(long updateTextureMillis) {
+        this.updateTextureMillis = updateTextureMillis;
+    }
+
+    public long getCurrentAnimTimeMillis() {
+        return currentAnimTimeMillis;
+    }
+
+    public void setCurrentAnimTimeMillis(long currentAnimTimeMillis) {
+        this.currentAnimTimeMillis = currentAnimTimeMillis;
+    }
+
 }

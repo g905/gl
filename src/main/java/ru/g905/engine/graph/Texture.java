@@ -25,6 +25,10 @@ public class Texture {
 
     private final int height;
 
+    private int numRows = 1;
+
+    private int numCols = 1;
+
     public Texture(String fileName) throws Exception {
         ByteBuffer buf;
         // Load Texture file
@@ -81,6 +85,12 @@ public class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
+    public Texture(String fileName, int numCols, int numRows) throws Exception {
+        this(fileName);
+        this.numCols = numCols;
+        this.numRows = numRows;
+    }
+
     private int createTexture(ByteBuffer buf) {
         // Create a new OpenGL texture
         int textureId = glGenTextures();
@@ -116,6 +126,22 @@ public class Texture {
 
     public int getId() {
         return id;
+    }
+
+    public int getNumRows() {
+        return numRows;
+    }
+
+    public void setNumRows(int numRows) {
+        this.numRows = numRows;
+    }
+
+    public int getNumCols() {
+        return numCols;
+    }
+
+    public void setNumCols(int numCols) {
+        this.numCols = numCols;
     }
 
     public void cleanup() {
