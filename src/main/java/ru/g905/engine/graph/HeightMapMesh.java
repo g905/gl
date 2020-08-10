@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ru.g905.engine.graph;
 
 import java.nio.ByteBuffer;
@@ -10,11 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.joml.Vector3f;
 import ru.g905.engine.Utils;
+import ru.g905.engine.graph.Material;
+import ru.g905.engine.graph.Mesh;
+import ru.g905.engine.graph.Texture;
 
-/**
- *
- * @author zharnikov
- */
 public class HeightMapMesh {
 
     private static final int MAX_COLOUR = 255 * 255 * 255;
@@ -66,13 +60,13 @@ public class HeightMapMesh {
                     int rightBottom = (row + 1) * width + col + 1;
                     int rightTop = row * width + col + 1;
 
-                    indices.add(leftTop);
-                    indices.add(leftBottom);
-                    indices.add(rightTop);
-
                     indices.add(rightTop);
                     indices.add(leftBottom);
                     indices.add(rightBottom);
+
+                    indices.add(leftTop);
+                    indices.add(leftBottom);
+                    indices.add(rightTop);
                 }
             }
         }
@@ -81,8 +75,7 @@ public class HeightMapMesh {
         float[] textCoordsArr = Utils.listToArray(textCoords);
         float[] normalsArr = calcNormals(posArr, width, height);
         this.mesh = new Mesh(posArr, textCoordsArr, normalsArr, indicesArr);
-        Material material = new Material(texture, 0.2f);
-        material.setNormalMap(new Texture("src/main/resources/textures/terrain7_normal.png"));
+        Material material = new Material(texture, 0.0f);
         mesh.setMaterial(material);
     }
 
@@ -181,13 +174,18 @@ public class HeightMapMesh {
     }
 
     private float getHeight(int x, int z, int width, ByteBuffer buffer) {
+        int argb = getRGB(x, z, width, buffer);
+        return this.minY + Math.abs(this.maxY - this.minY) * ((float) argb / (float) MAX_COLOUR);
+    }
+
+    public static int getRGB(int x, int z, int width, ByteBuffer buffer) {
         byte r = buffer.get(x * 4 + 0 + z * 4 * width);
         byte g = buffer.get(x * 4 + 1 + z * 4 * width);
         byte b = buffer.get(x * 4 + 2 + z * 4 * width);
         byte a = buffer.get(x * 4 + 3 + z * 4 * width);
         int argb = ((0xFF & a) << 24) | ((0xFF & r) << 16)
                 | ((0xFF & g) << 8) | (0xFF & b);
-        return this.minY + Math.abs(this.maxY - this.minY) * ((float) argb / (float) MAX_COLOUR);
+        return argb;
     }
 
 }

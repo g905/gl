@@ -5,6 +5,7 @@
  */
 package ru.g905.engine.items;
 
+import org.joml.Vector4f;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.loaders.obj.ObjLoader;
@@ -19,8 +20,17 @@ public class SkyBox extends GameItem {
     public SkyBox(String objModel, String textureFile) throws Exception {
         super();
         Mesh skyBoxMesh = ObjLoader.loadMesh(objModel);
-        Texture skyBoxTexture = new Texture(textureFile);
-        skyBoxMesh.setMaterial(new Material(skyBoxTexture, 0.0f));
+        Texture skyBoxtexture = new Texture(textureFile);
+        skyBoxMesh.setMaterial(new Material(skyBoxtexture, 0.0f));
+        setMesh(skyBoxMesh);
+        setPosition(0, 0, 0);
+    }
+
+    public SkyBox(String objModel, Vector4f colour) throws Exception {
+        super();
+        Mesh skyBoxMesh = ObjLoader.loadMesh(objModel);
+        Material material = new Material(colour, 0);
+        skyBoxMesh.setMaterial(material);
         setMesh(skyBoxMesh);
         setPosition(0, 0, 0);
     }

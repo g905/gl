@@ -135,7 +135,7 @@ public class Window {
             glCullFace(GL_BACK);
         }
 
-        //setIcon("src/main/resources/images/icons/icon5.png");
+        setIcon("src/main/resources/images/icons/icon5.png");
     }
 
     public void setIcon(String path) throws Exception {

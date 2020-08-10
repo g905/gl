@@ -5,30 +5,34 @@
  */
 package ru.g905.gl;
 
-import org.joml.Quaternionf;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.stb.STBImage.stbi_failure_reason;
+import static org.lwjgl.stb.STBImage.stbi_image_free;
+import static org.lwjgl.stb.STBImage.stbi_load;
+import org.lwjgl.system.MemoryStack;
 import ru.g905.engine.IGameLogic;
 import ru.g905.engine.MouseInput;
 import ru.g905.engine.Scene;
 import ru.g905.engine.SceneLight;
 import ru.g905.engine.Window;
 import ru.g905.engine.graph.Camera;
+import ru.g905.engine.graph.HeightMapMesh;
 import ru.g905.engine.graph.Material;
 import ru.g905.engine.graph.Mesh;
 import ru.g905.engine.graph.Renderer;
 import ru.g905.engine.graph.Texture;
-import ru.g905.engine.graph.anim.AnimGameItem;
 import ru.g905.engine.graph.lights.DirectionalLight;
 import ru.g905.engine.graph.particles.FlowParticleEmitter;
 import ru.g905.engine.graph.particles.Particle;
+import ru.g905.engine.graph.weather.Fog;
 import ru.g905.engine.items.GameItem;
+import ru.g905.engine.items.SkyBox;
 import ru.g905.engine.items.Terrain;
-import ru.g905.engine.loaders.md5.MD5AnimModel;
-import ru.g905.engine.loaders.md5.MD5Loader;
-import ru.g905.engine.loaders.md5.MD5Model;
 import ru.g905.engine.loaders.obj.ObjLoader;
 
 public class DummyGame implements IGameLogic {
@@ -55,8 +59,6 @@ public class DummyGame implements IGameLogic {
 
     private FlowParticleEmitter particleEmitter;
 
-    private AnimGameItem monster;
-
     public DummyGame() {
         renderer = new Renderer();
         camera = new Camera();
@@ -73,17 +75,62 @@ public class DummyGame implements IGameLogic {
 
         float reflectance = 1f;
 
-        // Setup  GameItems
+        float blockScale = 0.5f;
+        float skyBoxScale = 100.0f;
+        float extension = 2.0f;
+
+        float startx = extension * (-skyBoxScale + blockScale);
+        float startz = extension * (skyBoxScale - blockScale);
+        float starty = -1.0f;
+        float inc = blockScale * 2;
+
+        float posx = startx;
+        float posz = startz;
+        float incy = 0.0f;
+
+        ByteBuffer buf;
+        int width;
+        int height;
+        try ( MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            IntBuffer channels = stack.mallocInt(1);
+
+            buf = stbi_load("src/main/resources/textures/heightmap.png", w, h, channels, 4);
+            if (buf == null) {
+                throw new Exception("Image file not loaded: " + stbi_failure_reason());
+            }
+
+            width = w.get();
+            height = h.get();
+        }
+
+        int instances = height * width;
+        Mesh mesh = ObjLoader.loadMesh("models/cube.obj", instances);
+        Texture texture = new Texture("src/main/resources/textures/terrain_textures.png", 2, 1);
+        Material material = new Material(texture, reflectance);
+        mesh.setMaterial(material);
+        GameItem[] gameItems = new GameItem[instances];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                GameItem gameItem = new GameItem(mesh);
+                gameItem.setScale(blockScale);
+                int rgb = HeightMapMesh.getRGB(i, j, width, buf);
+                incy = rgb / (10 * 255 * 255);
+                gameItem.setPosition(posx, starty + incy, posz);
+                int textPos = Math.random() > 0.5f ? 0 : 1;
+                gameItem.setTextPos(textPos);
+                gameItems[i * width + j] = gameItem;
+
+                posx += inc;
+            }
+            posx = startx;
+            posz -= inc;
+        }
+        scene.setGameItems(gameItems);
+
+        // Particles
         int maxParticles = 200;
-        Mesh quadMesh = ObjLoader.loadMesh("models/plane.obj");
-        Material quadMaterial = new Material(new Vector4f(0.0f, 0.0f, 1.0f, 1.0f), reflectance);
-        quadMesh.setMaterial(quadMaterial);
-        GameItem quadGameItem = new GameItem(quadMesh);
-        quadGameItem.setPosition(0, 0, 0);
-        quadGameItem.setScale(2.5f);
-
-        scene.setGameItems(new GameItem[]{quadGameItem});
-
         Vector3f particleSpeed = new Vector3f(0, 1, 0);
         particleSpeed.mul(2.5f);
         long ttl = 4000;
@@ -91,8 +138,8 @@ public class DummyGame implements IGameLogic {
         float range = 0.2f;
         float scale = 1.0f;
         Mesh partMesh = ObjLoader.loadMesh("models/particle.obj", maxParticles);
-        Texture texture = new Texture("src/main/resources/textures/particle_anim.png", 4, 4);
-        Material partMaterial = new Material(texture, reflectance);
+        Texture particleTexture = new Texture("src/main/resources/textures/particle_anim.png", 4, 4);
+        Material partMaterial = new Material(particleTexture, reflectance);
         partMesh.setMaterial(partMaterial);
         Particle particle = new Particle(partMesh, particleSpeed, ttl, 100);
         particle.setScale(scale);
@@ -103,22 +150,18 @@ public class DummyGame implements IGameLogic {
         particleEmitter.setAnimRange(10);
         this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
 
-        MD5Model md5Meshodel = MD5Model.parse("models/monster.md5mesh");
-        MD5AnimModel md5AnimModel = MD5AnimModel.parse("models/monster.md5anim");
-        //MD5Model md5Meshodel = MD5Model.parse("models/boblamp.md5mesh");
-        //MD5AnimModel md5AnimModel = MD5AnimModel.parse("models/boblamp.md5anim");
-
-        monster = MD5Loader.process(md5Meshodel, md5AnimModel, new Vector4f(1, 1, 1, 1));
-        monster.setScale(0.05f);
-        Quaternionf n = new Quaternionf(-0.7, 0, 0, 0.7);
-        monster.setRotation(n);
-        monster.getMesh().getMaterial().setReflectance(1.0f);
-        monster.getMesh().getMaterial().setNormalMap(new Texture("src/main/resources/textures/monster/hellknight_local.png"));
-
-        scene.setGameItems(new GameItem[]{monster});
-
         // Shadows
         scene.setRenderShadows(false);
+
+        // Fog
+        Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
+        scene.setFog(new Fog(true, fogColour, 0.02f));
+
+        // Setup  SkyBox
+        SkyBox skyBox = new SkyBox("models/skybox_1.obj", new Vector4f(0.65f, 0.65f, 0.65f, 1.0f));
+        skyBox.getMesh().getMaterial().setTexture(new Texture("src/main/resources/textures/skybox8.jpg"));
+        skyBox.setScale(skyBoxScale);
+        scene.setSkyBox(skyBox);
 
         // Setup Lights
         setupLights();
@@ -130,6 +173,8 @@ public class DummyGame implements IGameLogic {
         camera.getRotation().y = -1;
 
         hud = new Hud("DEMO");
+
+        stbi_image_free(buf);
     }
 
     private void setupLights() {
