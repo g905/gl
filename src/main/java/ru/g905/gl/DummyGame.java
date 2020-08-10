@@ -7,10 +7,12 @@ package ru.g905.gl;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.glfw.GLFW.*;
+import org.lwjgl.openal.AL11;
 import static org.lwjgl.stb.STBImage.stbi_failure_reason;
 import static org.lwjgl.stb.STBImage.stbi_image_free;
 import static org.lwjgl.stb.STBImage.stbi_load;
@@ -33,7 +35,14 @@ import ru.g905.engine.graph.weather.Fog;
 import ru.g905.engine.items.GameItem;
 import ru.g905.engine.items.SkyBox;
 import ru.g905.engine.items.Terrain;
+import ru.g905.engine.loaders.md5.MD5AnimModel;
+import ru.g905.engine.loaders.md5.MD5Loader;
+import ru.g905.engine.loaders.md5.MD5Model;
 import ru.g905.engine.loaders.obj.ObjLoader;
+import ru.g905.engine.sound.SoundBuffer;
+import ru.g905.engine.sound.SoundListener;
+import ru.g905.engine.sound.SoundManager;
+import ru.g905.engine.sound.SoundSource;
 
 public class DummyGame implements IGameLogic {
 
@@ -59,8 +68,15 @@ public class DummyGame implements IGameLogic {
 
     private FlowParticleEmitter particleEmitter;
 
+    private final SoundManager soundMgr;
+
+    private enum Sounds {
+        MUSIC, BEEP, FIRE
+    };
+
     public DummyGame() {
         renderer = new Renderer();
+        soundMgr = new SoundManager();
         camera = new Camera();
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         angleInc = 0;
@@ -70,6 +86,7 @@ public class DummyGame implements IGameLogic {
     @Override
     public void init(Window window) throws Exception {
         renderer.init(window);
+        soundMgr.init();
 
         scene = new Scene();
 
@@ -129,6 +146,17 @@ public class DummyGame implements IGameLogic {
         }
         scene.setGameItems(gameItems);
 
+        MD5Model meshMonster = MD5Model.parse("models/monster.md5mesh");
+        MD5AnimModel md5AnimModel = MD5AnimModel.parse("models/monster.md5anim");
+
+        GameItem monster = MD5Loader.process(meshMonster, md5AnimModel, new Vector4f(1, 1, 1, 1));
+        monster.getMesh().getMaterial().setNormalMap(new Texture("src/main/resources/textures/monster/hellknight_local.png"));
+        monster.getMesh().getMaterial().setReflectance(2.0f);
+        monster.setScale(0.05f);
+        monster.setPosition(0, -7f, 0);
+        monster.setRotation(new Quaternionf(-0.7f, 0, 0, 0.7f));
+        scene.setGameItems(new GameItem[]{monster});
+
         // Particles
         int maxParticles = 200;
         Vector3f particleSpeed = new Vector3f(0, 1, 0);
@@ -151,7 +179,7 @@ public class DummyGame implements IGameLogic {
         this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
 
         // Shadows
-        scene.setRenderShadows(false);
+        scene.setRenderShadows(true);
 
         // Fog
         Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
@@ -175,6 +203,36 @@ public class DummyGame implements IGameLogic {
         hud = new Hud("DEMO");
 
         stbi_image_free(buf);
+
+        //Sounds
+        this.soundMgr.init();
+        this.soundMgr.setAttenuationModel(AL11.AL_EXPONENT_DISTANCE);
+        setupSounds();
+    }
+
+    private void setupSounds() throws Exception {
+        SoundBuffer buffBack = new SoundBuffer("/sounds/background.ogg");
+        soundMgr.addSoundBuffer(buffBack);
+        SoundSource sourceBack = new SoundSource(true, true);
+        sourceBack.setBuffer(buffBack.getBufferId());
+        soundMgr.addSoundSource(Sounds.MUSIC.toString(), sourceBack);
+
+        SoundBuffer buffBeep = new SoundBuffer("/sounds/beep.ogg");
+        soundMgr.addSoundBuffer(buffBeep);
+        SoundSource sourceBeep = new SoundSource(false, true);
+        sourceBeep.setBuffer(buffBeep.getBufferId());
+        soundMgr.addSoundSource(Sounds.BEEP.toString(), sourceBeep);
+
+        SoundBuffer buffFire = new SoundBuffer("/sounds/fire.ogg");
+        soundMgr.addSoundBuffer(buffFire);
+        SoundSource sourceFire = new SoundSource(true, false);
+        sourceFire.setBuffer(buffFire.getBufferId());
+        soundMgr.addSoundSource(Sounds.FIRE.toString(), sourceFire);
+        sourceFire.play();
+
+        soundMgr.setListener(new SoundListener(new Vector3f()));
+
+        sourceBack.play();
     }
 
     private void setupLights() {
@@ -214,8 +272,10 @@ public class DummyGame implements IGameLogic {
         }
         if (window.isKeyPressed(GLFW_KEY_LEFT)) {
             angleInc -= 0.05f;
+            soundMgr.playSoundSource(Sounds.BEEP.toString());
         } else if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
             angleInc += 0.05f;
+            soundMgr.playSoundSource(Sounds.BEEP.toString());
         } else {
             angleInc = 0;
         }
@@ -254,6 +314,8 @@ public class DummyGame implements IGameLogic {
         lightDirection.normalize();
 
         particleEmitter.update((long) (interval * 1000));
+
+        soundMgr.updateListenerPosition(camera);
     }
 
     @Override
@@ -267,6 +329,7 @@ public class DummyGame implements IGameLogic {
     @Override
     public void cleanup() {
         renderer.cleanup();
+        soundMgr.cleanup();
         scene.cleanup();
         if (hud != null) {
             hud.cleanup();
