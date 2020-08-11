@@ -31,7 +31,7 @@ public class Utils {
     public static String loadResource(String filename) throws Exception {
         System.out.println("load filename: " + filename);
         String result;
-        try ( InputStream in = Utils.class.getResourceAsStream(filename);  Scanner scanner = new Scanner(in, java.nio.charset.StandardCharsets.UTF_8.name())) {
+        try (InputStream in = Utils.class.getResourceAsStream(filename); Scanner scanner = new Scanner(in, java.nio.charset.StandardCharsets.UTF_8.name())) {
             result = scanner.useDelimiter("\\A").next();
         }
         return result;
@@ -79,7 +79,7 @@ public class Utils {
 
     public static boolean existsResourceFile(String fileName) {
         boolean result;
-        try ( InputStream is = Utils.class.getResourceAsStream(fileName)) {
+        try (InputStream is = Utils.class.getResourceAsStream(fileName)) {
             result = is != null;
         } catch (Exception excp) {
             result = false;
@@ -92,13 +92,13 @@ public class Utils {
 
         Path path = Paths.get(resource);
         if (Files.isReadable(path)) {
-            try ( SeekableByteChannel fc = Files.newByteChannel(path)) {
+            try (SeekableByteChannel fc = Files.newByteChannel(path)) {
                 buffer = BufferUtils.createByteBuffer((int) fc.size() + 1);
                 while (fc.read(buffer) != -1) ;
             }
         } else {
             try (
-                     InputStream source = Utils.class.getResourceAsStream(resource);  ReadableByteChannel rbc = Channels.newChannel(source)) {
+                    InputStream source = Utils.class.getResourceAsStream(resource); ReadableByteChannel rbc = Channels.newChannel(source)) {
                 buffer = createByteBuffer(bufferSize);
 
                 while (true) {

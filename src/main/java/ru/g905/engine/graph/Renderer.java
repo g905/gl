@@ -15,7 +15,6 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE2;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
-import ru.g905.engine.IHud;
 import ru.g905.engine.Scene;
 import ru.g905.engine.SceneLight;
 import ru.g905.engine.Utils;
@@ -52,8 +51,6 @@ public class Renderer {
 
     private ShaderProgram sceneShaderProgram;
 
-    private ShaderProgram hudShaderProgram;
-
     private ShaderProgram skyBoxShaderProgram;
 
     private ShaderProgram particlesShaderProgram;
@@ -72,10 +69,9 @@ public class Renderer {
         setupSkyBoxShader();
         setupSceneShader();
         setupParticlesShader();
-        setupHudShader();
     }
 
-    public void render(Window window, Camera camera, Scene scene, IHud hud) {
+    public void render(Window window, Camera camera, Scene scene) {
         clear();
 
         // Render depth map before view ports has been set up
@@ -89,7 +85,6 @@ public class Renderer {
         renderScene(window, camera, scene);
         renderSkyBox(window, camera, scene);
         renderParticles(window, camera, scene);
-        renderHud(window, hud);
 
         //renderAxes(camera);
     }
@@ -172,20 +167,8 @@ public class Renderer {
         sceneShaderProgram.createUniform("selectedNonInstanced");
     }
 
-    private void setupHudShader() throws Exception {
-        hudShaderProgram = new ShaderProgram();
-        hudShaderProgram.createVertexShader(Utils.loadResource("/shaders/hud_vertex.vs"));
-        hudShaderProgram.createFragmentShader(Utils.loadResource("/shaders/hud_fragment.fs"));
-        hudShaderProgram.link();
-
-        // Create uniforms for Ortographic-model projection matrix and base color
-        hudShaderProgram.createUniform("projModelMatrix");
-        hudShaderProgram.createUniform("color");
-        hudShaderProgram.createUniform("hasTexture");
-    }
-
     public void clear() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 
     private void renderParticles(Window window, Camera camera, Scene scene) {
@@ -416,27 +399,6 @@ public class Renderer {
         sceneShaderProgram.setUniform("dirLight", currDirLight);
     }
 
-    private void renderHud(Window window, IHud hud) {
-        if (hud != null) {
-            hudShaderProgram.bind();
-
-            Matrix4f ortho = transformation.getOrtho2DProjectionMatrix(0, window.getWidth(), window.getHeight(), 0);
-            for (GameItem gameItem : hud.getGameItems()) {
-                Mesh mesh = gameItem.getMesh();
-                // Set ortohtaphic and model matrix for this HUD item
-                Matrix4f projModelMatrix = transformation.buildOrthoProjModelMatrix(gameItem, ortho);
-                hudShaderProgram.setUniform("projModelMatrix", projModelMatrix);
-                hudShaderProgram.setUniform("color", gameItem.getMesh().getMaterial().getAmbientColor());
-                hudShaderProgram.setUniform("hasTexture", gameItem.getMesh().getMaterial().isTextured() ? 1 : 0);
-
-                // Render the mesh for this HUD item
-                mesh.render();
-            }
-
-            hudShaderProgram.unbind();
-        }
-    }
-
     /**
      * Renders the three axis in space (For debugging purposes only
      *
@@ -483,9 +445,6 @@ public class Renderer {
         }
         if (sceneShaderProgram != null) {
             sceneShaderProgram.cleanup();
-        }
-        if (hudShaderProgram != null) {
-            hudShaderProgram.cleanup();
         }
         if (particlesShaderProgram != null) {
             particlesShaderProgram.cleanup();

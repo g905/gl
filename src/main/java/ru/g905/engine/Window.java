@@ -127,17 +127,21 @@ public class Window {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST);
 
         if (opts.showTriangles) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         if (opts.cullFace) {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
         }
+        if (opts.antialiasing) {
+            glfwWindowHint(GLFW_SAMPLES, 4);
+        }
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         setIcon("src/main/resources/images/icons/icon5.png");
     }
@@ -162,6 +166,16 @@ public class Window {
             icons.position(0).width(width).height(height).pixels(buff);
 
             glfwSetWindowIcon(windowHandle, icons);
+        }
+    }
+
+    public void restoreState() {
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_STENCIL_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        if (opts.cullFace) {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
         }
     }
 
@@ -245,5 +259,6 @@ public class Window {
         public boolean showTriangles;
         public boolean showFps;
         public boolean compatibleProfile;
+        public boolean antialiasing;
     }
 }

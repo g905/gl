@@ -11,6 +11,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.glfw.GLFW.*;
+import org.lwjgl.openal.AL11;
 import static org.lwjgl.stb.STBImage.stbi_failure_reason;
 import static org.lwjgl.stb.STBImage.stbi_image_free;
 import static org.lwjgl.stb.STBImage.stbi_load;
@@ -36,6 +37,7 @@ import ru.g905.engine.items.Terrain;
 import ru.g905.engine.loaders.obj.ObjLoader;
 import ru.g905.engine.sound.SoundBuffer;
 import ru.g905.engine.sound.SoundListener;
+import ru.g905.engine.sound.SoundManager;
 import ru.g905.engine.sound.SoundSource;
 
 public class DummyGame implements IGameLogic {
@@ -64,7 +66,10 @@ public class DummyGame implements IGameLogic {
 
     private MouseBoxSelectionDetector selectDetector;
 
-    //private final SoundManager soundMgr;
+    private boolean leftButtonPressed;
+
+    private final SoundManager soundMgr;
+
     private enum Sounds {
         MUSIC, BEEP, FIRE
     };
@@ -73,17 +78,21 @@ public class DummyGame implements IGameLogic {
 
     public DummyGame() {
         renderer = new Renderer();
-        //soundMgr = new SoundManager();
+        soundMgr = new SoundManager();
         camera = new Camera();
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         angleInc = 0;
         lightAngle = 45;
+        hud = new Hud();
     }
 
     @Override
     public void init(Window window) throws Exception {
+        hud.init(window);
         renderer.init(window);
-        //soundMgr.init();
+        soundMgr.init();
+
+        leftButtonPressed = false;
 
         scene = new Scene();
 
@@ -174,13 +183,13 @@ public class DummyGame implements IGameLogic {
         particleEmitter.setPositionRndRange(range);
         particleEmitter.setSpeedRndRange(range);
         particleEmitter.setAnimRange(10);
-        //this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
+        this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
 
         // Shadows
         scene.setRenderShadows(false);
 
         // Fog
-        Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
+        Vector3f fogColour = new Vector3f(0.5f, 0.0f, 0.5f);
         scene.setFog(new Fog(true, fogColour, 0.02f));
 
         // Setup  SkyBox
@@ -198,14 +207,13 @@ public class DummyGame implements IGameLogic {
         camera.getRotation().x = 25;
         camera.getRotation().y = -1;
 
-        hud = new Hud("DEMO");
-
+        //hud = new Hud("DEMO");
         stbi_image_free(buf);
 
         //Sounds
-        //this.soundMgr.init();
-        //this.soundMgr.setAttenuationModel(AL11.AL_EXPONENT_DISTANCE);
-        //setupSounds();
+        this.soundMgr.init();
+        this.soundMgr.setAttenuationModel(AL11.AL_EXPONENT_DISTANCE);
+        setupSounds();
     }
 
     private void setupSounds() throws Exception {
@@ -270,10 +278,10 @@ public class DummyGame implements IGameLogic {
         }
         if (window.isKeyPressed(GLFW_KEY_LEFT)) {
             angleInc -= 0.05f;
-            //soundMgr.playSoundSource(Sounds.BEEP.toString());
+            soundMgr.playSoundSource(Sounds.BEEP.toString());
         } else if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
             angleInc += 0.05f;
-            //soundMgr.playSoundSource(Sounds.BEEP.toString());
+            soundMgr.playSoundSource(Sounds.BEEP.toString());
         } else {
             angleInc = 0;
         }
@@ -319,21 +327,25 @@ public class DummyGame implements IGameLogic {
             selectDetector.selectGameItem(gameItems, window, mouseInput.getCurrentPos(), camera);
         }
 
-        //soundMgr.updateListenerPosition(camera);
+        soundMgr.updateListenerPosition(camera);
+
+        boolean aux = mouseInput.isLeftButtonPressed();
+        if (aux && !this.leftButtonPressed && selectDetector.selectGameItem(gameItems, window, mouseInput.getCurrentPos(), camera)) {
+            this.hud.incCounter();
+        }
+        this.leftButtonPressed = aux;
     }
 
     @Override
     public void render(Window window) {
-        if (hud != null) {
-            hud.updateSize(window);
-        }
-        renderer.render(window, camera, scene, hud);
+        renderer.render(window, camera, scene);
+        hud.render(window);
     }
 
     @Override
     public void cleanup() {
         renderer.cleanup();
-        //soundMgr.cleanup();
+        soundMgr.cleanup();
         scene.cleanup();
         if (hud != null) {
             hud.cleanup();

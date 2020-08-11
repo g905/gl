@@ -35,7 +35,7 @@ public class MouseBoxSelectionDetector extends CameraBoxSelectionDetector {
         this.tmpVec = new Vector4f();
     }
 
-    public void selectGameItem(GameItem[] gameItems, Window window, Vector2d mousePos, Camera camera) {
+    public boolean selectGameItem(GameItem[] gameItems, Window window, Vector2d mousePos, Camera camera) {
         int wdwWidth = window.getWidth();
         int wdwHeight = window.getHeight();
 
@@ -58,7 +58,7 @@ public class MouseBoxSelectionDetector extends CameraBoxSelectionDetector {
 
         mouseDir.set(tmpVec.x, tmpVec.y, tmpVec.z);
 
-        selectGameItem(gameItems, camera.getPosition(), mouseDir);
+        return selectGameItem(gameItems, camera.getPosition(), mouseDir);
     }
 
 }
