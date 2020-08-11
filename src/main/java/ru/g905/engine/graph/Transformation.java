@@ -20,8 +20,6 @@ public class Transformation {
 
     private final Matrix4f modelLightViewMatrix;
 
-    private final Matrix4f viewMatrix;
-
     private final Matrix4f lightViewMatrix;
 
     private final Matrix4f orthoProjMatrix;
@@ -35,7 +33,6 @@ public class Transformation {
         modelMatrix = new Matrix4f();
         modelViewMatrix = new Matrix4f();
         modelLightViewMatrix = new Matrix4f();
-        viewMatrix = new Matrix4f();
         orthoProjMatrix = new Matrix4f();
         ortho2DMatrix = new Matrix4f();
         orthoModelMatrix = new Matrix4f();
@@ -57,14 +54,6 @@ public class Transformation {
 
     public Matrix4f updateOrthoProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar) {
         return orthoProjMatrix.setOrtho(left, right, bottom, top, zNear, zFar);
-    }
-
-    public Matrix4f getViewMatrix() {
-        return viewMatrix;
-    }
-
-    public Matrix4f updateViewMatrix(Camera camera) {
-        return updateGenericViewMatrix(camera.getPosition(), camera.getRotation(), viewMatrix);
     }
 
     public Matrix4f getLightViewMatrix() {

@@ -5,6 +5,7 @@
  */
 package ru.g905.engine.graph;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 /**
@@ -14,11 +15,15 @@ import org.joml.Vector3f;
 public class Camera {
 
     private final Vector3f position;
+
     private final Vector3f rotation;
+
+    private Matrix4f viewMatrix;
 
     public Camera() {
         position = new Vector3f();
         rotation = new Vector3f();
+        viewMatrix = new Matrix4f();
     }
 
     public Camera(Vector3f position, Vector3f rotation) {
@@ -34,6 +39,14 @@ public class Camera {
         position.x = x;
         position.y = y;
         position.z = z;
+    }
+
+    public Matrix4f getViewMatrix() {
+        return viewMatrix;
+    }
+
+    public Matrix4f updateViewMatrix() {
+        return Transformation.updateGenericViewMatrix(position, rotation, viewMatrix);
     }
 
     public void movePosition(float offsetX, float offsetY, float offsetZ) {

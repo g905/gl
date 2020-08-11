@@ -7,7 +7,6 @@ package ru.g905.engine.graph;
 
 import java.util.List;
 import java.util.Map;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -86,7 +85,6 @@ public class Renderer {
 
         // Update projection and view atrices once per render cycle
         transformation.updateProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
-        transformation.updateViewMatrix(camera);
 
         renderScene(window, camera, scene);
         renderSkyBox(window, camera, scene);
@@ -170,6 +168,8 @@ public class Renderer {
         sceneShaderProgram.createUniform("isInstanced");
         sceneShaderProgram.createUniform("numCols");
         sceneShaderProgram.createUniform("numRows");
+
+        sceneShaderProgram.createUniform("selectedNonInstanced");
     }
 
     private void setupHudShader() throws Exception {
@@ -195,14 +195,13 @@ public class Renderer {
         Matrix4f projectionMatrix = transformation.getProjectionMatrix();
         particlesShaderProgram.setUniform("projectionMatrix", projectionMatrix);
 
-        Matrix4f viewMatrix = transformation.getViewMatrix();
+        Matrix4f viewMatrix = camera.getViewMatrix();
         IParticleEmitter[] emitters = scene.getParticleEmitters();
         int numEmitters = emitters != null ? emitters.length : 0;
 
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-        Matrix3f aux = new Matrix3f();
         for (int i = 0; i < numEmitters; i++) {
             IParticleEmitter emitter = emitters[i];
             InstancedMesh mesh = (InstancedMesh) emitter.getBaseParticle().getMesh();
@@ -260,7 +259,7 @@ public class Renderer {
 
             Matrix4f projectionMatrix = transformation.getProjectionMatrix();
             skyBoxShaderProgram.setUniform("projectionMatrix", projectionMatrix);
-            Matrix4f viewMatrix = transformation.getViewMatrix();
+            Matrix4f viewMatrix = camera.getViewMatrix();
             float m30 = viewMatrix.m30();
             viewMatrix.m30(0);
             float m31 = viewMatrix.m31();
@@ -292,8 +291,8 @@ public class Renderer {
         Matrix4f orthoProjMatrix = transformation.getOrthoProjectionMatrix();
         sceneShaderProgram.setUniform("orthoProjectionMatrix", orthoProjMatrix);
         Matrix4f lightViewMatrix = transformation.getLightViewMatrix();
-        Matrix4f viewMatrix = transformation.getViewMatrix();
-
+        Matrix4f viewMatrix = camera.getViewMatrix();
+        camera.updateViewMatrix();
         SceneLight sceneLight = scene.getSceneLight();
         renderLights(viewMatrix, sceneLight);
 
@@ -329,6 +328,7 @@ public class Renderer {
             }
 
             mesh.renderList(mapMeshes.get(mesh), (GameItem gameItem) -> {
+                sceneShaderProgram.setUniform("selectedNonInstanced", gameItem.isSelected() ? 1.0f : 0.0f);
                 Matrix4f modelMatrix = transformation.buildModelMatrix(gameItem);
                 if (viewMatrix != null) {
                     Matrix4f modelViewMatrix = transformation.buildModelViewMatrix(modelMatrix, viewMatrix);

@@ -25,6 +25,8 @@ public class GameItem {
 
     private int textPos;
 
+    private boolean selected;
+
     public GameItem() {
         position = new Vector3f();
         scale = 1;
@@ -98,4 +100,13 @@ public class GameItem {
     public void setTextPos(int textPos) {
         this.textPos = textPos;
     }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
 }
