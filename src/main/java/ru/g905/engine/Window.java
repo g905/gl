@@ -7,6 +7,7 @@ package ru.g905.engine;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import org.joml.Matrix4f;
 import static org.lwjgl.glfw.GLFW.*;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
@@ -36,9 +37,12 @@ public class Window {
 
     private boolean vSync;
 
+    private final Matrix4f projectionMatrix;
+
     private WindowOptions opts;
 
     public Window(String title, int width, int height, boolean vSync, WindowOptions opts) {
+        projectionMatrix = new Matrix4f();
         this.title = title;
         this.width = width;
         this.height = height;
@@ -141,7 +145,7 @@ public class Window {
     public void setIcon(String path) throws Exception {
         ByteBuffer buff;
 
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -226,10 +230,20 @@ public class Window {
         return title;
     }
 
+    public Matrix4f getProjectionMatrix() {
+        return projectionMatrix;
+    }
+
+    public Matrix4f updateProjectionMatrix(float fov, float width, float height, float zNear, float zFar) {
+        float aspectRatio = width / height;
+        return projectionMatrix.setPerspective(fov, aspectRatio, zNear, zFar);
+    }
+
     public static class WindowOptions {
 
         public boolean cullFace;
         public boolean showTriangles;
         public boolean showFps;
+        public boolean compatibleProfile;
     }
 }

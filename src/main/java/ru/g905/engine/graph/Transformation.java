@@ -12,8 +12,6 @@ import ru.g905.engine.items.GameItem;
 
 public class Transformation {
 
-    private final Matrix4f projectionMatrix;
-
     private final Matrix4f modelMatrix;
 
     private final Matrix4f modelViewMatrix;
@@ -29,7 +27,6 @@ public class Transformation {
     private final Matrix4f orthoModelMatrix;
 
     public Transformation() {
-        projectionMatrix = new Matrix4f();
         modelMatrix = new Matrix4f();
         modelViewMatrix = new Matrix4f();
         modelLightViewMatrix = new Matrix4f();
@@ -37,15 +34,6 @@ public class Transformation {
         ortho2DMatrix = new Matrix4f();
         orthoModelMatrix = new Matrix4f();
         lightViewMatrix = new Matrix4f();
-    }
-
-    public Matrix4f getProjectionMatrix() {
-        return projectionMatrix;
-    }
-
-    public Matrix4f updateProjectionMatrix(float fov, float width, float height, float zNear, float zFar) {
-        float aspectRatio = width / height;
-        return projectionMatrix.setPerspective(fov, aspectRatio, zNear, zFar);
     }
 
     public final Matrix4f getOrthoProjectionMatrix() {

@@ -84,7 +84,7 @@ public class Renderer {
         glViewport(0, 0, window.getWidth(), window.getHeight());
 
         // Update projection and view atrices once per render cycle
-        transformation.updateProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
+        window.updateProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
 
         renderScene(window, camera, scene);
         renderSkyBox(window, camera, scene);
@@ -192,7 +192,7 @@ public class Renderer {
         particlesShaderProgram.bind();
 
         particlesShaderProgram.setUniform("texture_sampler", 0);
-        Matrix4f projectionMatrix = transformation.getProjectionMatrix();
+        Matrix4f projectionMatrix = window.getProjectionMatrix();
         particlesShaderProgram.setUniform("projectionMatrix", projectionMatrix);
 
         Matrix4f viewMatrix = camera.getViewMatrix();
@@ -257,7 +257,7 @@ public class Renderer {
 
             skyBoxShaderProgram.setUniform("texture_sampler", 0);
 
-            Matrix4f projectionMatrix = transformation.getProjectionMatrix();
+            Matrix4f projectionMatrix = window.getProjectionMatrix();
             skyBoxShaderProgram.setUniform("projectionMatrix", projectionMatrix);
             Matrix4f viewMatrix = camera.getViewMatrix();
             float m30 = viewMatrix.m30();
@@ -286,7 +286,7 @@ public class Renderer {
     public void renderScene(Window window, Camera camera, Scene scene) {
         sceneShaderProgram.bind();
 
-        Matrix4f projectionMatrix = transformation.getProjectionMatrix();
+        Matrix4f projectionMatrix = window.getProjectionMatrix();
         sceneShaderProgram.setUniform("projectionMatrix", projectionMatrix);
         Matrix4f orthoProjMatrix = transformation.getOrthoProjectionMatrix();
         sceneShaderProgram.setUniform("orthoProjectionMatrix", orthoProjMatrix);

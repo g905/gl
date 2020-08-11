@@ -62,7 +62,7 @@ public class DummyGame implements IGameLogic {
 
     private FlowParticleEmitter particleEmitter;
 
-    private CameraBoxSelectionDetector selectDetector;
+    private MouseBoxSelectionDetector selectDetector;
 
     //private final SoundManager soundMgr;
     private enum Sounds {
@@ -102,7 +102,7 @@ public class DummyGame implements IGameLogic {
         float posz = startz;
         float incy = 0.0f;
 
-        selectDetector = new CameraBoxSelectionDetector();
+        selectDetector = new MouseBoxSelectionDetector();
 
         ByteBuffer buf;
         int width;
@@ -280,7 +280,7 @@ public class DummyGame implements IGameLogic {
     }
 
     @Override
-    public void update(float interval, MouseInput mouseInput) {
+    public void update(float interval, MouseInput mouseInput, Window window) {
         // Update camera based on mouse
         if (mouseInput.isRightButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
@@ -315,7 +315,9 @@ public class DummyGame implements IGameLogic {
 
         camera.updateViewMatrix();
 
-        selectDetector.selectGameItem(gameItems, camera);
+        if (mouseInput.isLeftButtonPressed()) {
+            selectDetector.selectGameItem(gameItems, window, mouseInput.getCurrentPos(), camera);
+        }
 
         //soundMgr.updateListenerPosition(camera);
     }
