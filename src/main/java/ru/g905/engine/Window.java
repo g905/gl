@@ -149,7 +149,7 @@ public class Window {
     public void setIcon(String path) throws Exception {
         ByteBuffer buff;
 
-        try (MemoryStack stack = MemoryStack.stackPush()) {
+        try ( MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -260,5 +260,6 @@ public class Window {
         public boolean showFps;
         public boolean compatibleProfile;
         public boolean antialiasing;
+        public boolean frustumCulling;
     }
 }

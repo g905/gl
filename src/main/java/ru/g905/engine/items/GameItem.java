@@ -27,11 +27,18 @@ public class GameItem {
 
     private boolean selected;
 
+    private boolean disableFrustumCulling;
+
+    private boolean insideFrustum;
+
     public GameItem() {
+        selected = false;
         position = new Vector3f();
         scale = 1;
         rotation = new Quaternionf();
         textPos = 0;
+        insideFrustum = true;
+        disableFrustumCulling = false;
     }
 
     public GameItem(Mesh mesh) {
@@ -107,6 +114,22 @@ public class GameItem {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public boolean isInsideFrustum() {
+        return insideFrustum;
+    }
+
+    public void setInsideFrustum(boolean insideFrustum) {
+        this.insideFrustum = insideFrustum;
+    }
+
+    public boolean isDisableFrustumCulling() {
+        return disableFrustumCulling;
+    }
+
+    public void setDisableFrustumCulling(boolean disableFrustumCulling) {
+        this.disableFrustumCulling = disableFrustumCulling;
     }
 
 }

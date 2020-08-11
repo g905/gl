@@ -116,7 +116,7 @@ public class DummyGame implements IGameLogic {
         ByteBuffer buf;
         int width;
         int height;
-        try (MemoryStack stack = MemoryStack.stackPush()) {
+        try ( MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -189,7 +189,7 @@ public class DummyGame implements IGameLogic {
         scene.setRenderShadows(false);
 
         // Fog
-        Vector3f fogColour = new Vector3f(0.5f, 0.0f, 0.5f);
+        Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
         scene.setFog(new Fog(true, fogColour, 0.02f));
 
         // Setup  SkyBox

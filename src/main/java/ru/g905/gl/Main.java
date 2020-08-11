@@ -26,6 +26,8 @@ public class Main {
             opts.cullFace = false;
             opts.showFps = true;
             opts.showTriangles = false;
+            opts.compatibleProfile = true;
+            opts.frustumCulling = true;
             GameEngine gameEng = new GameEngine("Game", vSync, opts, gameLogic);
             gameEng.run();
         } catch (Exception exp) {

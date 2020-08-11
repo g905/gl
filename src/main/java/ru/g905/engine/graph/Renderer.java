@@ -5,16 +5,15 @@
  */
 package ru.g905.engine.graph;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE2;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL30.*;
 import ru.g905.engine.Scene;
 import ru.g905.engine.SceneLight;
 import ru.g905.engine.Utils;
@@ -57,9 +56,15 @@ public class Renderer {
 
     private final float specularPower;
 
+    private final FrustumCullingFilter frustumFilter;
+
+    private final List<GameItem> filteredItems;
+
     public Renderer() {
         transformation = new Transformation();
         specularPower = 10f;
+        frustumFilter = new FrustumCullingFilter();
+        filteredItems = new ArrayList<>();
     }
 
     public void init(Window window) throws Exception {
@@ -74,6 +79,12 @@ public class Renderer {
     public void render(Window window, Camera camera, Scene scene) {
         clear();
 
+        if (window.getWindowOptions().frustumCulling) {
+            frustumFilter.updateFrustum(window.getProjectionMatrix(), camera.getViewMatrix());
+            frustumFilter.filter(scene.getGameMeshes());
+            frustumFilter.filter(scene.getGameInstancedMeshes());
+        }
+
         // Render depth map before view ports has been set up
         renderDepthMap(window, camera, scene);
 
@@ -86,6 +97,7 @@ public class Renderer {
         renderSkyBox(window, camera, scene);
         renderParticles(window, camera, scene);
 
+        //renderCrossHair(window);
         //renderAxes(camera);
     }
 
@@ -347,7 +359,13 @@ public class Renderer {
                 glActiveTexture(GL_TEXTURE2);
                 glBindTexture(GL_TEXTURE_2D, shadowMap.getDepthMapTexture().getId());
             }
-            mesh.renderListInstanced(mapMeshes.get(mesh), transformation, viewMatrix, lightViewMatrix);
+            filteredItems.clear();
+            for (GameItem gameItem : mapMeshes.get(mesh)) {
+                if (gameItem.isInsideFrustum()) {
+                    filteredItems.add(gameItem);
+                }
+            }
+            mesh.renderListInstanced(filteredItems, transformation, viewMatrix, lightViewMatrix);
         }
     }
 
@@ -397,6 +415,32 @@ public class Renderer {
         dir.mul(viewMatrix);
         currDirLight.setDirection(new Vector3f(dir.x, dir.y, dir.z));
         sceneShaderProgram.setUniform("dirLight", currDirLight);
+    }
+
+    private void renderCrossHair(Window window) {
+        if (window.getWindowOptions().compatibleProfile) {
+            glPushMatrix();
+            glLoadIdentity();
+
+            float inc = 0.05f;
+            glLineWidth(2.0f);
+
+            glBegin(GL_LINES);
+
+            glColor3f(1.0f, 1.0f, 1.0f);
+
+            glVertex3f(-inc, 0.0f, 0.0f);
+            glVertex3f(+inc, 0.0f, 0.0f);
+            glEnd();
+
+            glBegin(GL_LINES);
+
+            glVertex3f(0.0f, -inc, 0.0f);
+            glVertex3f(0.0f, +inc, 0.0f);
+            glEnd();
+
+            glPopMatrix();
+        }
     }
 
     /**
