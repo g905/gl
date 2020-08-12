@@ -70,6 +70,10 @@ public class DummyGame implements IGameLogic {
 
     private final SoundManager soundMgr;
 
+    private boolean firstTime;
+
+    private boolean sceneChanged;
+
     private enum Sounds {
         MUSIC, BEEP, FIRE
     };
@@ -78,12 +82,13 @@ public class DummyGame implements IGameLogic {
 
     public DummyGame() {
         renderer = new Renderer();
+        hud = new Hud();
         soundMgr = new SoundManager();
         camera = new Camera();
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         angleInc = 0;
         lightAngle = 45;
-        hud = new Hud();
+        firstTime = true;
     }
 
     @Override
@@ -116,7 +121,7 @@ public class DummyGame implements IGameLogic {
         ByteBuffer buf;
         int width;
         int height;
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -186,7 +191,7 @@ public class DummyGame implements IGameLogic {
         this.scene.setParticleEmitters(new FlowParticleEmitter[]{particleEmitter});
 
         // Shadows
-        scene.setRenderShadows(false);
+        scene.setRenderShadows(true);
 
         // Fog
         Vector3f fogColour = new Vector3f(0.5f, 0.5f, 0.5f);
@@ -253,33 +258,42 @@ public class DummyGame implements IGameLogic {
         float lightIntensity = 1.0f;
         Vector3f lightDirection = new Vector3f(0, 1, 1);
         DirectionalLight directionalLight = new DirectionalLight(new Vector3f(1, 1, 1), lightDirection, lightIntensity);
-        directionalLight.setShadowPosMult(10);
-        directionalLight.setOrthoCoords(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 20.0f);
+        //directionalLight.setShadowPosMult(10);
+        //directionalLight.setOrthoCoords(-10.0f, 10.0f, -10.0f, 10.0f, -1.0f, 20.0f);
         sceneLight.setDirLight(directionalLight);
     }
 
     @Override
     public void input(Window window, MouseInput mouseInput) {
+        sceneChanged = false;
         cameraInc.set(0, 0, 0);
         if (window.isKeyPressed(GLFW_KEY_W)) {
+            sceneChanged = true;
             cameraInc.z = -1;
         } else if (window.isKeyPressed(GLFW_KEY_S)) {
+            sceneChanged = true;
             cameraInc.z = 1;
         }
         if (window.isKeyPressed(GLFW_KEY_A)) {
+            sceneChanged = true;
             cameraInc.x = -1;
         } else if (window.isKeyPressed(GLFW_KEY_D)) {
+            sceneChanged = true;
             cameraInc.x = 1;
         }
         if (window.isKeyPressed(GLFW_KEY_Z)) {
+            sceneChanged = true;
             cameraInc.y = -1;
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
+            sceneChanged = true;
             cameraInc.y = 1;
         }
         if (window.isKeyPressed(GLFW_KEY_LEFT)) {
+            sceneChanged = true;
             angleInc -= 0.05f;
             soundMgr.playSoundSource(Sounds.BEEP.toString());
         } else if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
+            sceneChanged = true;
             angleInc += 0.05f;
             soundMgr.playSoundSource(Sounds.BEEP.toString());
         } else {
@@ -293,6 +307,7 @@ public class DummyGame implements IGameLogic {
         if (mouseInput.isRightButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+            sceneChanged = true;
         }
 
         // Update camera position
@@ -323,10 +338,6 @@ public class DummyGame implements IGameLogic {
 
         camera.updateViewMatrix();
 
-        if (mouseInput.isLeftButtonPressed()) {
-            selectDetector.selectGameItem(gameItems, window, mouseInput.getCurrentPos(), camera);
-        }
-
         soundMgr.updateListenerPosition(camera);
 
         boolean aux = mouseInput.isLeftButtonPressed();
@@ -338,7 +349,11 @@ public class DummyGame implements IGameLogic {
 
     @Override
     public void render(Window window) {
-        renderer.render(window, camera, scene);
+        if (firstTime) {
+            sceneChanged = true;
+            firstTime = false;
+        }
+        renderer.render(window, camera, scene, sceneChanged);
         hud.render(window);
     }
 

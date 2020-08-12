@@ -180,14 +180,14 @@ public class Mesh {
     }
 
     protected void initRender() {
-        Texture texture = material.getTexture();
+        Texture texture = material != null ? material.getTexture() : null;
         if (texture != null) {
             // Activate first texture bank
             glActiveTexture(GL_TEXTURE0);
             // Bind the texture
             glBindTexture(GL_TEXTURE_2D, texture.getId());
         }
-        Texture normalMap = material.getNormalMap();
+        Texture normalMap = material != null ? material.getNormalMap() : null;
         if (normalMap != null) {
             // Activate first texture bank
             glActiveTexture(GL_TEXTURE1);
@@ -218,10 +218,12 @@ public class Mesh {
         initRender();
 
         for (GameItem gameItem : gameItems) {
-            // Set up data required by GameItem
-            consumer.accept(gameItem);
-            // Render this game item
-            glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
+            if (gameItem.isInsideFrustum()) {
+                // Set up data required by GameItem
+                consumer.accept(gameItem);
+                // Render this game item
+                glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
+            }
         }
 
         endRender();

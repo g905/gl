@@ -25,7 +25,13 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  */
 public class Window {
 
-    private String title;
+    public static final float FOV = (float) Math.toRadians(60.0f);
+
+    public static final float Z_NEAR = 0.01f;
+
+    public static final float Z_FAR = 1000.0f;
+
+    private final String title;
 
     private int width;
 
@@ -42,13 +48,13 @@ public class Window {
     private WindowOptions opts;
 
     public Window(String title, int width, int height, boolean vSync, WindowOptions opts) {
-        projectionMatrix = new Matrix4f();
         this.title = title;
         this.width = width;
         this.height = height;
         this.vSync = vSync;
         this.resized = false;
         this.opts = opts;
+        projectionMatrix = new Matrix4f();
     }
 
     public void init() throws Exception {
@@ -66,8 +72,14 @@ public class Window {
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE); // the window will be resizable
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        if (opts.compatibleProfile) {
+            //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        } else {
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        }
 
         boolean maximized = false;
         if (width == 0 || height == 0) {
@@ -149,7 +161,7 @@ public class Window {
     public void setIcon(String path) throws Exception {
         ByteBuffer buff;
 
-        try ( MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
@@ -248,9 +260,14 @@ public class Window {
         return projectionMatrix;
     }
 
-    public Matrix4f updateProjectionMatrix(float fov, float width, float height, float zNear, float zFar) {
+    public Matrix4f updateProjectionMatrix() {
+        float aspectRatio = (float) width / (float) height;
+        return projectionMatrix.setPerspective(FOV, aspectRatio, Z_NEAR, Z_FAR);
+    }
+
+    public Matrix4f updateProjectionMatrix(Matrix4f matrix, int width, int height) {
         float aspectRatio = width / height;
-        return projectionMatrix.setPerspective(fov, aspectRatio, zNear, zFar);
+        return matrix.setPerspective(FOV, aspectRatio, Z_NEAR, Z_FAR);
     }
 
     public static class WindowOptions {
