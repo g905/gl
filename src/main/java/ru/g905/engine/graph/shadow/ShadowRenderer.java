@@ -32,7 +32,7 @@ import ru.g905.engine.items.GameItem;
  */
 public class ShadowRenderer {
 
-    public static final int NUM_CASCADES = 3;
+    public static final int NUM_CASCADES = 2;
 
     public static final float[] CASCADE_SPLITS = new float[]{Window.Z_FAR / 20.0f, Window.Z_FAR / 10.0f, Window.Z_FAR};
 
